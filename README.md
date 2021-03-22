@@ -1,4 +1,6 @@
-# timelineview
+# timeline_view
+
+Projeto Final (descrição em desenvolvimento)
 
 ## Project setup
 ```
