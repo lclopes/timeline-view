@@ -25,20 +25,35 @@ class Painting:
         return name.group(0)
 
     def setAuthorBirthYear(self, authorData):
-        regExBirthYear = r'[0-9][0-9][0-9][0-9]'
+        regExBirthYear = r'[0-9][0-9][0-9][0-9]-'
         birthYear = re.search(regExBirthYear, authorData)
-        return birthYear.group(0)
+        if (birthYear == None):
+            return "Unknown"
+        else:
+            return birthYear.group(0).split('-')[0]
 
     def setAuthorDeathYear(self, authorData):
-        regExDeathYear = r'-[0-9][0-9][0-9][0-9]'
+        regExDeathYear = r'-[0-9][0-9][0-9][0-9](.|,)'
         deathYear = re.search(regExDeathYear, authorData)
-        return (deathYear.group(0).split('-'))[1]
+        if (deathYear == None):
+            return "Unknown"
+        else:
+            return re.split('[, .]',deathYear.group(0).split('-')[1])[0]
+
+    def setActive(self, authorData):
+        regExActive = r'(active|active approximately)( [0-9][0-9][0-9][0-9].| [0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].)'
+        activeDate = re.search(regExActive, authorData)
+        if (activeDate == None):
+            return "Unknown"
+        else:
+            return re.split('[.]',activeDate.group(0).split(' ')[1])[0]
 
 class Author:
-    def __init__(self, name, birthYear, deathYear):
+    def __init__(self, name, birthYear, deathYear, activeDate):
         self.name = name
         self.birthYear = birthYear
         self.deathYear = deathYear
+        self.activeDate = activeDate
 
 ## RECORD CLASS ##
 # This class holds all the paintings.
@@ -57,11 +72,12 @@ def readfile(file):
             if line_count == 0:
                 line_count += 1
             else:
-                a = Author('','','')
+                a = Author('','','', '')
                 p = Painting(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9])
                 a.name = p.setAuthorName(row[1])
                 a.birthYear = p.setAuthorBirthYear(row[1])
                 a.deathYear = p.setAuthorDeathYear(row[1])
+                a.activeDate = p.setActive(row[1])
                 records.paintings.append(p)
                 authors.append(a)
                 line_count += 1
@@ -71,5 +87,6 @@ def readfile(file):
             print("NAME>>>>> ",authors[i].name)
             print("BIRTH YEAR>>>>> ",authors[i].birthYear)
             print("DEATH YEAR>>>>> ",authors[i].deathYear)
+            print("ACTIVE DATE>>>>> ", authors[i].activeDate)
             print('')
 readfile("../public/portraits_test.csv")
