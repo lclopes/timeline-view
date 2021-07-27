@@ -1,5 +1,6 @@
 import csv
 import re
+
 ## PAINTING CLASS ##
 # This class holds the paintings' metadata.
 class Painting:
@@ -17,15 +18,18 @@ class Painting:
 
     def getRecordNumber(self):
         return self.recordNumber
-    
+
     ## TODO: CHECK REGEX
     def setAuthorName(self, authorData):
-        regExName = r'[a-zA-Z ]*, [a-zA-Z ]*[a-zA-Z. ]* ?[(a-zA-Z )]*'
+        regExName = r'([a-zA-Z ]*, [a-zA-Z ]*[a-zA-Z. ]* ?[(a-zA-Z )]*|[a-zA-Z]*)'
         name = re.search(regExName, authorData)
-        return name.group(0)
+        if (name.group(0).find("Anonymous") != -1):
+            return "Anonymous"
+        else:
+            return name.group(0)
 
     def setAuthorBirthYear(self, authorData):
-        regExBirthYear = r'[0-9][0-9][0-9][0-9]-'
+        regExBirthYear = r'[0-9][0-9][0-9][0-9]\?+-'
         birthYear = re.search(regExBirthYear, authorData)
         if (birthYear == None):
             return "Unknown"
@@ -41,20 +45,34 @@ class Painting:
             return re.split('[, .]',deathYear.group(0).split('-')[1])[0]
 
     def setActive(self, authorData):
-        regExActive = r'(active|active approximately)( [0-9][0-9][0-9][0-9].| [0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].)'
+        regExActive = r'(active|active approximately) (([0-9][0-9][0-9][0-9].| [0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].)|[1][0-9]th century.)'
         activeDate = re.search(regExActive, authorData)
         if (activeDate == None):
             return "Unknown"
         else:
-            return re.split('[.]',activeDate.group(0).split(' ')[1])[0]
+            if (activeDate.group(0).find("approximately") != -1):
+                return re.split('[.]',activeDate.group(0).split(' ')[2])[0]
+            elif (activeDate.group(0).find("century") != -1):
+                return re.split('[.]',activeDate.group(0).split(' ')[1])[0] + " century" 
+            else:
+                return re.split('[.]',activeDate.group(0).split(' ')[1])[0]
+
+    def setDetails(self, authorData):
+        regExDet = r'(attributed to|copy of|school of|contributor)'
+        details = re.findall(regExDet, authorData)
+        if (details == None):
+            return "Unknown"
+        else:
+            return details
 
 class Author:
-    def __init__(self, name, birthYear, deathYear, activeDate):
+    def __init__(self, name, birthYear, deathYear, activeDate, details):
         self.name = name
         self.birthYear = birthYear
         self.deathYear = deathYear
         self.activeDate = activeDate
-
+        self.details = details
+ 
 ## RECORD CLASS ##
 # This class holds all the paintings.
 class Record:
@@ -72,21 +90,23 @@ def readfile(file):
             if line_count == 0:
                 line_count += 1
             else:
-                a = Author('','','', '')
+                a = Author('','','', '', '')
                 p = Painting(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9])
                 a.name = p.setAuthorName(row[1])
                 a.birthYear = p.setAuthorBirthYear(row[1])
                 a.deathYear = p.setAuthorDeathYear(row[1])
                 a.activeDate = p.setActive(row[1])
+                a.details = p.setDetails(row[1])
                 records.paintings.append(p)
                 authors.append(a)
                 line_count += 1
 
         for i in range (len(records.paintings)):
-            print("AuthorData>>>>> ",records.paintings[i].authorData)   
+            print("AuthorData>>>>> ",records.paintings[i].authorData)
             print("NAME>>>>> ",authors[i].name)
             print("BIRTH YEAR>>>>> ",authors[i].birthYear)
             print("DEATH YEAR>>>>> ",authors[i].deathYear)
             print("ACTIVE DATE>>>>> ", authors[i].activeDate)
+            print("DETAILS >>>>> ", authors[i].details)
             print('')
 readfile("../public/portraits_test.csv")
