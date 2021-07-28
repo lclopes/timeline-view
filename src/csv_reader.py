@@ -19,7 +19,7 @@ class Painting:
     def getRecordNumber(self):
         return self.recordNumber
 
-    ## TODO: CHECK REGEX
+    ## setAuthorName: get author name from CSV entry
     def setAuthorName(self, authorData):
         regExName = r'([a-zA-Z ]*, [a-zA-Z ]*[a-zA-Z. ]* ?[(a-zA-Z )]*|[a-zA-Z]*)'
         name = re.search(regExName, authorData)
@@ -28,22 +28,25 @@ class Painting:
         else:
             return name.group(0)
 
+    ## setAuthorBirthYear: get author birth year from CSV entry
     def setAuthorBirthYear(self, authorData):
-        regExBirthYear = r'[0-9][0-9][0-9][0-9]\?+-'
+        regExBirthYear = r'([0-9][0-9][0-9][0-9]-|[0-9][0-9][0-9][0-9]\?-)'
         birthYear = re.search(regExBirthYear, authorData)
         if (birthYear == None):
             return "Unknown"
         else:
             return birthYear.group(0).split('-')[0]
 
+    ## setAuthorDeathYear: get author death year from CSV entry
     def setAuthorDeathYear(self, authorData):
-        regExDeathYear = r'-[0-9][0-9][0-9][0-9](.|,)'
+        regExDeathYear = r'(-[0-9][0-9][0-9][0-9](.|,)|-[0-9][0-9][0-9][0-9]\?(.|,))'
         deathYear = re.search(regExDeathYear, authorData)
         if (deathYear == None):
             return "Unknown"
         else:
             return re.split('[, .]',deathYear.group(0).split('-')[1])[0]
 
+    ## setAuthorBirthYear: get author activity information (if there are any) from CSV entry
     def setActive(self, authorData):
         regExActive = r'(active|active approximately) (([0-9][0-9][0-9][0-9].| [0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].)|[1][0-9]th century.)'
         activeDate = re.search(regExActive, authorData)
@@ -57,6 +60,7 @@ class Painting:
             else:
                 return re.split('[.]',activeDate.group(0).split(' ')[1])[0]
 
+    ## setDetails: get author details (such as attributed to, copy of, etc.) from CSV entry
     def setDetails(self, authorData):
         regExDet = r'(attributed to|copy of|school of|contributor)'
         details = re.findall(regExDet, authorData)
@@ -65,6 +69,8 @@ class Painting:
         else:
             return details
 
+## AUTHOR CLASS ##
+# This class holds the authors' information generated after the application of the regular expressions.
 class Author:
     def __init__(self, name, birthYear, deathYear, activeDate, details):
         self.name = name
@@ -80,6 +86,8 @@ class Record:
         self.paintings = paintings
 
 ## TESTING FUNCTIONS ##
+# read from file and storing in data structures
+#### TODO: SAVE NEW CSV FILE WITH AUTHOR DATA ONLY
 def readfile(file):
     records = Record(paintings=[])
     authors = []
@@ -101,12 +109,15 @@ def readfile(file):
                 authors.append(a)
                 line_count += 1
 
+    ## print all data from Paintings class
         for i in range (len(records.paintings)):
             print("AuthorData>>>>> ",records.paintings[i].authorData)
             print("NAME>>>>> ",authors[i].name)
             print("BIRTH YEAR>>>>> ",authors[i].birthYear)
             print("DEATH YEAR>>>>> ",authors[i].deathYear)
-            print("ACTIVE DATE>>>>> ", authors[i].activeDate)
-            print("DETAILS >>>>> ", authors[i].details)
+            print("ACTIVE DATE (IF EXISTS)>>>>> ", authors[i].activeDate)
+            print("DETAILS (IF EXISTS)>>>>> ", authors[i].details)
             print('')
-readfile("../public/portraits_test.csv")
+
+## run inside /src folder: python csv_reader.py            
+readfile("../public/American_portraits_metadata.csv")
