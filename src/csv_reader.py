@@ -60,7 +60,7 @@ class Painting:
             else:
                 return re.split('[.]',activeDate.group(0).split(' ')[1])[0]
 
-    ## setDetails: get author details (such as attributed to, copy of, etc.) from CSV entry
+    ## setDetails: get author details (such as attributed to, copy of, etc.) from CSV entry (array value)
     def setDetails(self, authorData):
         regExDet = r'(attributed to|copy of|school of|contributor)'
         details = re.findall(regExDet, authorData)
