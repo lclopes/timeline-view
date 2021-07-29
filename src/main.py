@@ -48,7 +48,7 @@ class Painting:
 
     ## setAuthorBirthYear: get author activity information (if there are any) from CSV entry
     def setActive(self, authorData):
-        regExActive = r'(active|active approximately) (([0-9][0-9][0-9][0-9].| [0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].)|[1][0-9]th century.)'
+        regExActive = r'(active|active approximately) (([0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].|[0-9][0-9][0-9][0-9].)|[1][0-9]th century.)'
         activeDate = re.search(regExActive, authorData)
         if (activeDate == None):
             return "Unknown"
@@ -86,9 +86,25 @@ class Record:
         self.paintings = paintings
 
 ## TESTING FUNCTIONS ##
+# transforming array a into string separated by commas
+def arrayToString(a):
+    return ', '.join(a)
+
+# write object read from csv to new csv
+def writeFile(records,authors):
+    with open('exit.csv', mode='w') as file:
+        fieldnames = ['name','birth_year','death_year','active_date','details']
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for i in range (len(records.paintings)):
+            writer.writerow({'name':authors[i].name, 'birth_year':authors[i].birthYear, 
+            'death_year':authors[i].deathYear, 'active_date':authors[i].activeDate,
+            'details':('None' if len(authors[i].details) == 0 else arrayToString(authors[i].details) )})
+
 # read from file and storing in data structures
-#### TODO: SAVE NEW CSV FILE WITH AUTHOR DATA ONLY
-def readfile(file):
+# save file in csv
+def readAndSave(file):
     records = Record(paintings=[])
     authors = []
     with open (file, newline='') as csvfile:
@@ -109,7 +125,9 @@ def readfile(file):
                 authors.append(a)
                 line_count += 1
 
-    ## print all data from Paintings class
+        ## write to csv
+        writeFile(records,authors)
+        ## print all data from Paintings class
         for i in range (len(records.paintings)):
             print("AuthorData>>>>> ",records.paintings[i].authorData)
             print("NAME>>>>> ",authors[i].name)
@@ -119,5 +137,5 @@ def readfile(file):
             print("DETAILS (IF EXISTS)>>>>> ", authors[i].details)
             print('')
 
-## run inside /src folder: python csv_reader.py            
-readfile("../public/American_portraits_metadata.csv")
+## run inside /src folder: python main.py            
+readAndSave("../public/American_portraits_metadata.csv")
