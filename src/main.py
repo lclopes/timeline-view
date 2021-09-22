@@ -35,7 +35,7 @@ class Painting:
         if (birthYear == None):
             return "Unknown"
         else:
-            return birthYear.group(0).split('-')[0]
+            return re.split('[?]',birthYear.group(0).split('-')[0])[0]
 
     ## setAuthorDeathYear: get author death year from CSV entry
     def setAuthorDeathYear(self, authorData):
@@ -44,7 +44,7 @@ class Painting:
         if (deathYear == None):
             return "Unknown"
         else:
-            return re.split('[, .]',deathYear.group(0).split('-')[1])[0]
+            return re.split('[?]',re.split('[, .]',deathYear.group(0).split('-')[1])[0])[0]
 
     ## setAuthorBirthYear: get author activity information (if there are any) from CSV entry
     def setActive(self, authorData):
@@ -138,4 +138,4 @@ def readAndSave(file):
             print('')
 
 ## run inside /src folder: python main.py            
-readAndSave("../public/American_portraits_metadata.csv")
+readAndSave("../public/portraits_test.csv")

@@ -1,7 +1,6 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    {{ load()   }}
     <p>
       For a guide and recipes on how to configure / customize this project,<br>
       check out the
@@ -36,21 +35,6 @@ export default {
   name: 'HelloWorld',
   props: {
     msg: String
-  },
-  methods: {
-    load() {
-      const csv = require('csv-parser');
-      const fs = require('fs').promises;
-
-      fs.createReadStream('../public/American_portraits_metadata.csv')
-        .pipe(csv())
-        .on('data', (row) => {
-          console.log(row);
-        })
-        .on('end', () => {
-          console.log('CSV file successfully processed');
-        });
-    }
   }
 }
 </script>

@@ -1,17 +1,16 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Hello World!"/>
+    <Timeline msg="Visualização em Linha do Tempo"/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Timeline from './components/Timeline.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    Timeline
   }
 }
 </script>
