@@ -1,19 +1,38 @@
-name,birth_year,death_year,active_date,details
-"Bridgman, Frederick Arthur",1847,1928,Unknown,None
-"Cassatt, Mary",1844,1926,Unknown,None
-"Healy, G. P. A. (George Peter Alexander)",1813,1894,Unknown,None
-"Latrobe, John H. B. (John Hazlehurst Boneval)",1803,1891,Unknown,None
-"Waud, Alfred R. (Alfred Rudolph)",1828,1891,Unknown,None
-"Eichholtz, Jacob",1776,1842,Unknown,copy of
-"Harding, John Livingston",Unknown,1882,Unknown,None
-"Gay, Lin",Unknown,Unknown,1798,None
-"Maten, Nancy",Unknown,Unknown,1850,None
-Anonymous,1801,1850,Unknown,None
-"Van Bibber, Hester",Unknown,Unknown,19th century,None
-Anonymous,Unknown,Unknown,19th century,None
-"Folwell, Samuel",1765,1813,Unknown,None
-"Schipper, Gerrit",1775,1826,Unknown,None
-"Bibbins, M. K. S.",1897,1940,1897-1940,None
-"McGibbon, James",1800,Unknown,1800-,None
-"Mayr, Christian",1805,1851,Unknown,None
-"Montague, Harriotte Lee Taliaferro.",Unknown,Unknown,Unknown,None
+name,birth_year,death_year,active_date,details,technique,medium
+"Bridgman, Frederick Arthur",1847,1928,Unknown,None,drawing,charcoal on board.
+"Cassatt, Mary",1844,1926,Unknown,None,drawing,pastel
+"Healy, G. P. A. (George Peter Alexander)",1813,1894,Unknown,None,drawing,
+"Latrobe, John H. B. (John Hazlehurst Boneval)",1803,1891,Unknown,None,drawing,pencil on paper.
+"Waud, Alfred R. (Alfred Rudolph)",1828,1891,Unknown,None,drawing,
+"Eichholtz, Jacob",1776,1842,Unknown,copy of,painting,oil on canvas.
+Anonymous,1801,1850,Unknown,None,drawing,
+"Folwell, Samuel",1765,1813,Unknown,None,silhouette,silhouette painted in black and white on paper.
+"Schipper, Gerrit",1775,1826,Unknown,None,drawing,pastel.
+"Bibbins, M. K. S.",1897,1940,1897-1940,None,drawing,pastel.
+"Mayr, Christian",1805,1851,Unknown,None,painting,oil on canvas.
+"Fulton, Robert",1765,1815,Unknown,None,miniature,
+"Fulton, Robert",1765,1815,Unknown,None,miniature,on ivory.
+"Fulton, Robert",1765,1815,Unknown,attributed to,miniature,
+"Fulton, Robert",1765,1815,Unknown,None,miniature,watercolor on ivory.
+"Fulton, Robert",1765,1815,Unknown,attributed to,miniature,on ivory.
+"Fanshaw, Samuel Raymond",1814,1888,Unknown,None,miniature,on ivory.
+"Felder, Alice Rutledge",1872,1940,Unknown,None,miniature,
+"Ferris, Jean Leon Gerome",1863,1930,Unknown,None,miniature,probably on panel.
+"Flagg, George W. (George Whiting)",1816,1897,Unknown,None,miniature,oil on panel.
+"Flagg, George W. (George Whiting)",1816,1897,Unknown,None,miniature, oil on panel.
+"Folwell, Samuel",1765,1813,Unknown,None,miniature,watercolor on cream-colored paper.
+"Freeman, George",1789,1868,Unknown,None,miniature,on ivory.
+"Freeman, George",1789,1868,Unknown,None,miniature,on ivory.
+"Freeman, George",1789,1868,Unknown,None,miniature,on ivory.
+"Freeman, George",1789,1868,Unknown,attributed to,miniature,on ivory.
+"Freeman, George",1789,1868,Unknown,None,miniature,ivory.
+"Freeman, George",1789,1868,Unknown,None,miniature,on ivory.
+"Freeman, James E. (James Edward)",1808,1884,Unknown,None,miniature,watercolor on ivory.
+"Frothingham, Sarah C.",1821,1861,Unknown,None,miniature,on ivory.
+"Frymire, Jacob",1765,1822,Unknown,None,miniature,on ivory.
+"Goodridge, Sarah",1788,1853,Unknown,None,miniature,watercolor on ivory.
+"Goodridge, Sarah",1788,1853,Unknown,None,miniature,
+"Goodridge, Sarah",1788,1853,Unknown,None,miniature,
+"Goodridge, Sarah",1788,1853,Unknown,None,miniature,watercolor on ivory.
+"Goodridge, Sarah",1788,1853,Unknown,None,miniature,watercolor on ivory.
+"Goodridge, Sarah",1788,1853,Unknown,None,miniature,
