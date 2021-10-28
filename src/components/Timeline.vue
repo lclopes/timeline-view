@@ -8,7 +8,12 @@
             <p>
             Visualização em Linha do Tempo
             </p>
-             <input type="text" id="birth" name="birth"><br><br>
+            <label for="ranges">Intervalo  </label>
+            <select id="ranges" name="ranges">
+              <option value="1">1700-1800</option>
+              <option value="2">1800-1900</option>
+              <option value="3">1700-1900</option>
+            </select>
           </div>
         </v-col>
         <v-col id="my_dataviz" />
@@ -24,7 +29,7 @@ import MainGraph from '../mainGraph';
 export default {
   name: 'Timeline',
   async mounted() {
-    const data = await this.getCSV("/exit.csv");
+    const data = await d3.csv("/exit.csv");
     this.createGraph(data)
   },
   methods: {
@@ -37,17 +42,7 @@ export default {
     async getCSV(file) {
       var data = await d3.csv(file);
       return data;
-    },
-
-    // getInput() {
-    //   d3.select('#birth').on("input", function(){
-    //     update
-    //   });
-    // },
-
-    // update() {
-
-    // }
+    }
 }
 };
 </script>
