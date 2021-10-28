@@ -127,10 +127,10 @@ def readAndSave(file):
                 a.details = p.setDetails(row[1])
                 a.technique = row[3]
                 a.medium = row[5]
-                if(a.birthYear != 'Unknown' and a.deathYear != 'Unknown'):
-                    records.paintings.append(p)
-                    authors.append(a)
-                    line_count += 1
+                # if(a.birthYear != 'Unknown' and a.deathYear != 'Unknown'):
+                records.paintings.append(p)
+                authors.append(a)
+                line_count += 1
 
         ## write to csv
         writeFile(records,authors)
