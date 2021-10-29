@@ -29,12 +29,12 @@ import MainGraph from '../mainGraph';
 export default {
   name: 'Timeline',
   async mounted() {
-    const data = await d3.csv("/exit.csv");
-    this.createGraph(data)
+    var data = d3.csv("/exit.csv");
+    await this.createGraph(data);
   },
   methods: {
     
-    createGraph(data) {
+    async createGraph(data) {
       var g = new MainGraph(data);
       g.createGraph();
     },

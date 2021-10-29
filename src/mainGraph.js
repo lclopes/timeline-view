@@ -1,15 +1,7 @@
 import * as d3 from "d3";
 export default class MainGraph {
-    constructor(data, birthYearDomain){
+    constructor(data){
         this.data = data;
-
-        if(birthYearDomain != null) {
-          this.birthYearDomain = birthYearDomain;
-        } else {
-          this.birthYearDomain = 1750;
-        }
-
-        this.svg = null;
         this.x = null;
         this.y = null;
     }
@@ -21,97 +13,148 @@ export default class MainGraph {
             height = 700 - margin.top - margin.bottom;
   
         // append the svg object to the body of the page
-        this.svg = d3.select("#my_dataviz")
+        var svg = d3.select("#my_dataviz")
           .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
           .append("g")
             .attr("transform",
                   "translate(" + margin.left + "," + margin.top + ")");
-  
-        // Add X axis
+
+      this.data.then(function(data){
+        console.log(data)
         var x = d3.scaleLinear()
-          .domain([this.birthYearDomain, 1970])
+          .domain([1750, 1970])
           .range([0, width]);
-        this.svg.append("g")
+        svg.append("g")
           .attr("transform", "translate(0," + height + ")")
           .call(d3.axisBottom(x))
   
         // Y axis
         var y = d3.scaleBand()
           .range([ 0, height ])
-          .domain(this.data.map(function(d) { return d.name; }))
+          .domain(data.map(function(d) { return d.name; }))
           .padding(1);
-        this.svg.append("g")
+        svg.append("g")
           .call(d3.axisLeft(y))
   
         // Lines
-        this.svg.selectAll("myline")
-          .data(this.data)
+        svg.selectAll("myline")
+          .data(data)
           .enter()
           .append("line")
-            .attr("x1", function(d) { if (d.birth_year != "Unknown") {return x(d.birth_year); }})
-            .attr("x2", function(d) { if (d.death_year != "Unknown") {return x(d.death_year); }})
+            .attr("x1", function(d) { if (+d.birth_year != "Unknown") {return x(+d.birth_year); }})
+            .attr("x2", function(d) { if (+d.death_year != "Unknown") {return x(+d.death_year); }})
             .attr("y1", function(d) { return y(d.name); })
             .attr("y2", function(d) { return y(d.name); })
             .attr("stroke", function(d){ if (d.birth_year == "Unknown" || d.death_year == "Unknown") {return "white"} else {return "grey"}})
             .attr("stroke-width", "1px")
 
-        var tooltip = d3.select("#my_dataviz")
-        .append("div")
+        // var tooltip = d3.select("#my_dataviz")
+        // .append("div")
+        // .style("opacity", 0)
+        // .style("background-color", "white")
+        // .style("border", "solid")
+        // .style("border-width", "2px")
+        // .style("border-radius", "5px")
+        // .style("padding", "5px")
+        // .text("a simple tooltip");
+        var tooltip = d3.select("body").append("div")
         .style("opacity", 0)
-        .style("background-color", "white")
-        .style("border", "solid")
-        .style("border-width", "2px")
-        .style("border-radius", "5px")
-        .style("padding", "5px")
-
+        .style("position", "absolute")
+        .style("text-align", "center")
+        .style("width", "70px")
+        .style("height", "58px")
+        .style("padding", "8px")
+        .style("font", "18px sans-serif")
+        .style("pointer-events", "none")
+        .style("background", "white")
+        .style("border", "1px")
+        .style("border-style", "solid")
+        .style("border-radius", "8px")
+        .style("border-color", "black")
         // Three function that change the tooltip when user hover / move / leave a cell
-        var mouseover = function() {
-          tooltip
-          .style("opacity", 1)
-        }
-        var mousemoveB = function(d) {
-          tooltip
-            .html("Date of birth: "+ d.birth_year)
-            .style("color", "#000")
-        }
-        var mousemoveD = function(d) {
-          tooltip
-            .html("Date of death: "+ d.death_year)
-            .style("color", "#000")
-        }
-        var mouseleave = function() {
-          tooltip
-            .style("opacity", 0)
-        }
+        // var mouseover = function() {
+        //   tooltip
+        //   .style("opacity", 1)
+        //   .text(function(d) {tooltip.text(d); return d; })
+        // }
+        // var mousemoveB = function(d) {
+        //   tooltip
+        //   .style("opacity", 1)
+        //     .html("Date of birth: "+ d.birth_year)
+        //     .style("color", "#000")
+        // }
+        // var mousemoveD = function(d) {
+        //   tooltip
+        //   .style("opacity", 1)
+        //     .html("Date of death: "+ d.death_year)
+        //     .style("color", "#000")
+        // }
+        // var mouseleave = function() {
+        //   tooltip
+        //     .style("opacity", 0)
+        // }
 
         // Circles of variable 1
-        this.svg.selectAll("mycircle")
-          .data(this.data)
+        svg.selectAll("mycircle")
+          .data(data)
           .enter()
           .append("circle")
-            .attr("cx", function(d) { if (d.birth_year != "Unknown") {return x(d.birth_year); }})
+            .attr("cx", function(d) { if (d.birth_year != "Unknown") {return x(+d.birth_year); } else { return }})
             .attr("cy", function(d) { return y(d.name); })
             .attr("r", "6")
             .style("fill", function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}})
-          .on("mouseover", mouseover)
-          .on("mousemove", mousemoveB)
-          .on("mouseleave", mouseleave)
+          // .on("mouseover", mouseover)
+          // .on("mouseover", mousemoveB)
+          .on("mouseover", function(event,d) {
+            d3.select(this).attr("r", 10).style("fill", "#69b3a2");
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+              tooltip.html("Year of birth" + "<br/>" + d.birth_year)
+              .style("left", (event.pageX) + "px")
+              .style("top", (event.pageY - 28) + "px");
+            })
+          .on("mouseout", function() {
+            d3.select(this).attr("r", 6).style("fill", " #69b3a2");
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", 0);
+            });
+     
+          // .on("mouseleave", mouseleave)
             
           
         // Circles of variable 2
-        this.svg.selectAll("mycircle")
-          .data(this.data)
+        svg.selectAll("mycircle")
+          .data(data)
           .enter()
           .append("circle")
-            .attr("cx", function(d) { if (d.death_year != "Unknown") {return x(d.death_year); } else { return }})
+            .attr("cx", function(d) { if (d.death_year != "Unknown") {return x(+d.death_year); } else { return }})
             .attr("cy", function(d) { return y(d.name); })
             .attr("r", "6")
             .style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}})
-          .on("mouseover", mouseover)
-          .on("mousemove", mousemoveD)
-          .on("mouseleave", mouseleave)
-            
+          // .on("mouseover", mouseover)
+          // .on("mouseover", mousemoveD)
+          // .on("mouseleave", mouseleave)
+          .on("mouseover", function(event,d) {
+            d3.select(this).attr("r", 10).style("fill", "#4C4082");
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+              tooltip.html("Year of death" + "<br/>" + d.death_year)
+              .style("left", (event.pageX) + "px")
+              .style("top", (event.pageY - 28) + "px");
+            })
+          .on("mouseout", function() {
+            d3.select(this).attr("r", 6).style("fill", "#4C4082");
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", 0);
+            });
+          
+      })
+        
     }
 }
