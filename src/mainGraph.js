@@ -50,15 +50,6 @@ export default class MainGraph {
             .attr("stroke", function(d){ if (d.birth_year == "Unknown" || d.death_year == "Unknown") {return "white"} else {return "grey"}})
             .attr("stroke-width", "1px")
 
-        // var tooltip = d3.select("#my_dataviz")
-        // .append("div")
-        // .style("opacity", 0)
-        // .style("background-color", "white")
-        // .style("border", "solid")
-        // .style("border-width", "2px")
-        // .style("border-radius", "5px")
-        // .style("padding", "5px")
-        // .text("a simple tooltip");
         var tooltip = d3.select("body").append("div")
         .style("opacity", 0)
         .style("position", "absolute")
@@ -72,29 +63,7 @@ export default class MainGraph {
         .style("border", "1px")
         .style("border-style", "solid")
         .style("border-radius", "8px")
-        .style("border-color", "black")
-        // Three function that change the tooltip when user hover / move / leave a cell
-        // var mouseover = function() {
-        //   tooltip
-        //   .style("opacity", 1)
-        //   .text(function(d) {tooltip.text(d); return d; })
-        // }
-        // var mousemoveB = function(d) {
-        //   tooltip
-        //   .style("opacity", 1)
-        //     .html("Date of birth: "+ d.birth_year)
-        //     .style("color", "#000")
-        // }
-        // var mousemoveD = function(d) {
-        //   tooltip
-        //   .style("opacity", 1)
-        //     .html("Date of death: "+ d.death_year)
-        //     .style("color", "#000")
-        // }
-        // var mouseleave = function() {
-        //   tooltip
-        //     .style("opacity", 0)
-        // }
+        .style("border-color", "black");
 
         // Circles of variable 1
         svg.selectAll("mycircle")
@@ -122,9 +91,6 @@ export default class MainGraph {
               .duration(200)
               .style("opacity", 0);
             });
-     
-          // .on("mouseleave", mouseleave)
-            
           
         // Circles of variable 2
         svg.selectAll("mycircle")
@@ -135,9 +101,6 @@ export default class MainGraph {
             .attr("cy", function(d) { return y(d.name); })
             .attr("r", "6")
             .style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}})
-          // .on("mouseover", mouseover)
-          // .on("mouseover", mousemoveD)
-          // .on("mouseleave", mouseleave)
           .on("mouseover", function(event,d) {
             d3.select(this).attr("r", 10).style("fill", "#4C4082");
             tooltip.transition()

@@ -37,12 +37,8 @@ export default {
     async createGraph(data) {
       var g = new MainGraph(data);
       g.createGraph();
-    },
-
-    async getCSV(file) {
-      var data = await d3.csv(file);
-      return data;
     }
+    
 }
 };
 </script>
