@@ -8,8 +8,8 @@ export default class MainGraph {
 
     createGraph() {
         // set the dimensions and margins of the graph
-        var margin = {top: 10, right: 30, bottom: 30, left: 220},
-            width = 1200 - margin.left - margin.right,
+        var margin = {top: 10, right: 30, bottom: 30, left: 320},
+            width = 1600 - margin.left - margin.right,
             height = 700 - margin.top - margin.bottom;
   
         // append the svg object to the body of the page

@@ -120,19 +120,19 @@ def readAndSave(file):
             else:
                 a = Author('','','', '', '', '', '')
                 p = Painting(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9])
-                if(p.setAuthorName(row[1]) != "Anonymous"):
+                if(p.setAuthorName(row[1]) == "Anonymous"):
+                    a.name = row[1]
+                else:
                     a.name = p.setAuthorName(row[1])
-                    a.birthYear = p.setAuthorBirthYear(row[1])
-                    a.deathYear = p.setAuthorDeathYear(row[1])
-                    a.activeDate = p.setActive(row[1])
-                    a.details = p.setDetails(row[1])
-                    a.technique = row[3]
-                    a.medium = row[5]
-                    # if(a.birthYear != 'Unknown' and a.deathYear != 'Unknown'):
-                    records.paintings.append(p)
-                    authors.append(a)
-                    line_count += 1
-               
+                a.birthYear = p.setAuthorBirthYear(row[1])
+                a.deathYear = p.setAuthorDeathYear(row[1])
+                a.activeDate = p.setActive(row[1])
+                a.details = p.setDetails(row[1])
+                a.technique = row[3]
+                a.medium = row[5]
+                records.paintings.append(p)
+                authors.append(a)
+                line_count += 1
 
         ## write to csv
         writeFile(records,authors)
