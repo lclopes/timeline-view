@@ -77,7 +77,7 @@ export default class MainGraph {
           // .on("mouseover", mouseover)
           // .on("mouseover", mousemoveB)
           .on("mouseover", function(event,d) {
-            d3.select(this).attr("r", 10).style("fill", "#69b3a2");
+            d3.select(this).attr("r", 10).style(function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}});
             tooltip.transition()
               .duration(200)
               .style("opacity", .9);
@@ -86,7 +86,7 @@ export default class MainGraph {
               .style("top", (event.pageY - 28) + "px");
             })
           .on("mouseout", function() {
-            d3.select(this).attr("r", 6).style("fill", " #69b3a2");
+            d3.select(this).attr("r", 6).style("fill", function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}});
             tooltip.transition()
               .duration(200)
               .style("opacity", 0);
@@ -102,7 +102,7 @@ export default class MainGraph {
             .attr("r", "6")
             .style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}})
           .on("mouseover", function(event,d) {
-            d3.select(this).attr("r", 10).style("fill", "#4C4082");
+            d3.select(this).attr("r", 10).style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}});
             tooltip.transition()
               .duration(200)
               .style("opacity", .9);
@@ -111,7 +111,7 @@ export default class MainGraph {
               .style("top", (event.pageY - 28) + "px");
             })
           .on("mouseout", function() {
-            d3.select(this).attr("r", 6).style("fill", "#4C4082");
+            d3.select(this).attr("r", 6).style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}});
             tooltip.transition()
               .duration(200)
               .style("opacity", 0);
