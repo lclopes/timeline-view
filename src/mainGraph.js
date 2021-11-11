@@ -38,18 +38,7 @@ export default class MainGraph {
         svg.append("g")
           .call(d3.axisLeft(y))
   
-        // Lines
-        svg.selectAll("myline")
-          .data(data)
-          .enter()
-          .append("line")
-            .attr("x1", function(d) { if (+d.birth_year != "Unknown") {return x(+d.birth_year); }})
-            .attr("x2", function(d) { if (+d.death_year != "Unknown") {return x(+d.death_year); }})
-            .attr("y1", function(d) { return y(d.name); })
-            .attr("y2", function(d) { return y(d.name); })
-            .attr("stroke", function(d){ if (d.birth_year == "Unknown" || d.death_year == "Unknown") {return "white"} else {return "grey"}})
-            .attr("stroke-width", "1px")
-
+        // Tooltips
         var tooltip = d3.select("body").append("div")
         .style("opacity", 0)
         .style("position", "absolute")
@@ -65,6 +54,61 @@ export default class MainGraph {
         .style("border-radius", "8px")
         .style("border-color", "black");
 
+        // var authorInfo = d3.select("body").append("div")
+        // .style("opacity", 0)
+        // .style("position", "absolute")
+        // .style("text-align", "center")
+        // .style("width", "200px")
+        // .style("height", "58px")
+        // .style("padding", "8px")
+        // .style("font", "18px sans-serif")
+        // .style("pointer-events", "none")
+        // .style("background", "white")
+        // .style("border", "1px")
+        // .style("border-style", "solid")
+        // .style("border-radius", "8px")
+        // .style("border-color", "black");
+
+        var authors = [...new Set(data.map(d => d.name))];
+        var uniqueAuthors = authors.map(function(d) {
+          return data.find(function(e) {
+            return e.name === d
+          })
+        })
+
+        var paintings = [...new Set(data.map(d => d.title))];
+        console.log(paintings);
+        // Lines
+        svg.selectAll("myline")
+          .data(uniqueAuthors)
+          .enter()
+          .append("line")
+            .attr("x1", function(d) { if (+d.birth_year != "Unknown") {return x(+d.birth_year); }})
+            .attr("x2", function(d) { if (+d.death_year != "Unknown") {return x(+d.death_year); }})
+            .attr("y1", function(d) { return y(d.name); })
+            .attr("y2", function(d) { return y(d.name); })
+            .attr("stroke", function(d){ if (d.birth_year == "Unknown" || d.death_year == "Unknown") {return "white"} else {return "grey"}})
+            .attr("stroke-width", "2px")
+          .on("mouseover", function() {
+              var authorPaintings = d3.group(data, d => d.name, d => d.title)
+              console.log(authorPaintings[2])
+              // authorInfo.transition()
+              // .duration(200)
+              // .style("opacity", .9);
+              // authorInfo.html(
+              //   "<%  var i;"+
+              //   "for i in authorPaintings{ %>"+
+              //   "    <div data-role=\"page\" class=\"pages\"  >"+
+              //   "</div>"+
+              //   "}%>"
+              //   )
+              // .style("left", (event.pageX) + "px")
+              // .style("top", (event.pageY - 28) + "px");
+            })
+            //   .style("left", (event.pageX) + "px")
+            //   .style("top", (event.pageY - 28) + "px");
+            // })
+
         // Circles of variable 1
         svg.selectAll("mycircle")
           .data(data)
@@ -74,8 +118,6 @@ export default class MainGraph {
             .attr("cy", function(d) { return y(d.name); })
             .attr("r", "6")
             .style("fill", function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}})
-          // .on("mouseover", mouseover)
-          // .on("mouseover", mousemoveB)
           .on("mouseover", function(event,d) {
             d3.select(this).attr("r", 10).style(function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}});
             tooltip.transition()
