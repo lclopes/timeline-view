@@ -8,9 +8,9 @@ export default class MainGraph {
 
     createGraph() {
         // set the dimensions and margins of the graph
-        var margin = {top: 10, right: 30, bottom: 30, left: 320},
-            width = 1600 - margin.left - margin.right,
-            height = 700 - margin.top - margin.bottom;
+        var margin = {top: 10, right: 0, bottom: 30, left: 30},
+            width = 1400 - margin.left - margin.right,
+            height = 1200 - margin.top - margin.bottom;
   
         // append the svg object to the body of the page
         var svg = d3.select("#my_dataviz")
@@ -20,14 +20,15 @@ export default class MainGraph {
           .append("g")
             .attr("transform",
                   "translate(" + margin.left + "," + margin.top + ")");
-
+        
+        
       this.data.then(function(data){
         console.log(data)
+        // Y axis
         var x = d3.scaleLinear()
           .domain([1750, 1970])
           .range([0, width]);
         svg.append("g")
-          .attr("transform", "translate(0," + height + ")")
           .call(d3.axisBottom(x))
   
         // Y axis
@@ -35,9 +36,15 @@ export default class MainGraph {
           .range([ 0, height ])
           .domain(data.map(function(d) { return d.name; }))
           .padding(1);
-        svg.append("g")
-          .call(d3.axisLeft(y))
-  
+        // svg.append("g")
+        //   .call(d3.axisLeft(y))
+
+        const yAxisGrid = d3.axisLeft(y).tickSize(-width).tickFormat('').ticks(10);
+        svg.append('g')
+        .attr('class', 'y axis-grid')
+        .attr('color','#DDD')
+        .call(yAxisGrid);
+
         // Tooltips
         var tooltip = d3.select("body").append("div")
         .style("opacity", 0)
@@ -54,20 +61,20 @@ export default class MainGraph {
         .style("border-radius", "8px")
         .style("border-color", "black");
 
-        // var authorInfo = d3.select("body").append("div")
-        // .style("opacity", 0)
-        // .style("position", "absolute")
-        // .style("text-align", "center")
-        // .style("width", "200px")
-        // .style("height", "58px")
-        // .style("padding", "8px")
-        // .style("font", "18px sans-serif")
-        // .style("pointer-events", "none")
-        // .style("background", "white")
-        // .style("border", "1px")
-        // .style("border-style", "solid")
-        // .style("border-radius", "8px")
-        // .style("border-color", "black");
+        var authorInfo = d3.select("body").append("div")
+        .style("opacity", 0)
+        .style("position", "absolute")
+        .style("text-align", "center")
+        .style("width", "200px")
+        .style("height", "58px")
+        .style("padding", "8px")
+        .style("font", "12px sans-serif")
+        .style("pointer-events", "none")
+        .style("background", "white")
+        .style("border", "1px")
+        .style("border-style", "solid")
+        .style("border-radius", "8px")
+        .style("border-color", "black");
 
         var authors = [...new Set(data.map(d => d.name))];
         
@@ -113,8 +120,9 @@ export default class MainGraph {
             .attr("x2", function(d) { if (+d.death_year != "Unknown") {return x(+d.death_year); }})
             .attr("y1", function(d) { return y(d.name); })
             .attr("y2", function(d) { return y(d.name); })
-            .attr("stroke", function(d){ if (d.birth_year == "Unknown" || d.death_year == "Unknown") {return "white"} else {return "grey"}})
-            .attr("stroke-width", "2px")
+            .attr("stroke", function(d){ if (d.birth_year == "Unknown" || d.death_year == "Unknown") {return "white"} else {return "#CCC"}})
+            .attr("stroke-width", "4px")
+            
           .on("mouseover", function(event, d) {
             var paintings = []
             for (let a in authorPaintings){
@@ -123,47 +131,73 @@ export default class MainGraph {
               }
             }
             console.log(paintings)
-            tooltip.transition()
-              .duration(200)
+            d3.select(this).transition()
+            .duration('400').attr("stroke-width", "8px")
+            authorInfo.transition()
+              .duration(400)
               .style("opacity", .9);
-              tooltip.html(paintings)
+              authorInfo.html("As obras vão aparecer aqui")
               .style("left", (event.pageX) + "px")
               .style("top", (event.pageY - 28) + "px");
           })
           .on("mouseout", function() {
-            tooltip.transition()
-              .duration(200)
+            d3.select(this).transition()
+            .duration('400').attr("stroke-width", "5px")
+            authorInfo.transition()
+              .duration(400)
               .style("opacity", 0);
             });
-          
+        svg.selectAll("myline")
+          .data(uniqueAuthors)
+          .enter()
+          .append("text")
+            .attr("x", function(d) { if (+d.birth_year != "Unknown" && +d.death_year != "Unknown") {return x(+d.birth_year) + 20; }})
+            .attr("y", function(d) { return y(d.name) -5; })
+            .attr('stroke', 'grey')
+            .attr("font-weight", 400)
+            .style("font-size", 14)
+            .text(function(d) { return d.name })
+
+        svg.selectAll("myline")
+            .data(uniqueAuthors)
+            .enter()
+            .append("line")
+              .attr("x", function(d) { if (+d.birth_year != "Unknown" && +d.death_year != "Unknown") {return x(+d.birth_year) + 20; }})
+              .attr("y", function(d) { return y(d.name); })
+              .attr('stroke', 'grey')
+              .attr("stroke-width", "4px")
+
         // Circles of variable 1
         svg.selectAll("mycircle")
-          .data(data)
+          .data(uniqueAuthors)
           .enter()
           .append("circle")
             .attr("cx", function(d) { if (d.birth_year != "Unknown") {return x(+d.birth_year); } else { return }})
             .attr("cy", function(d) { return y(d.name); })
             .attr("r", "6")
             .style("fill", function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}})
-          .on("mouseover", function(event,d) {
-            d3.select(this).attr("r", 10).style(function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}});
-            tooltip.transition()
-              .duration(200)
-              .style("opacity", .9);
-              tooltip.html("Year of birth" + "<br/>" + d.birth_year)
-              .style("left", (event.pageX) + "px")
-              .style("top", (event.pageY - 28) + "px");
-            })
-          .on("mouseout", function() {
-            d3.select(this).attr("r", 6).style("fill", function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}});
-            tooltip.transition()
-              .duration(200)
-              .style("opacity", 0);
-            });
+            .on("mouseover", function(event,d) {
+              d3.select(this).transition()
+                .duration('200').attr("r", 10).style("fill", function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}});
+              tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+                tooltip.html("Year of birth" + "<br/>" + d.birth_year)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 28) + "px");
+              })
+            .on("mouseout", function() {
+              d3.select(this).transition()
+              .duration('200').attr("r", 6).style("fill", function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}});
+              tooltip.transition()
+                .duration(200)
+                .style("opacity", 0);
+              });
           
         // Circles of variable 2
         svg.selectAll("mycircle")
-          .data(data)
+        
+          .data(uniqueAuthors)
           .enter()
           .append("circle")
             .attr("cx", function(d) { if (d.death_year != "Unknown") {return x(+d.death_year); } else { return }})
@@ -171,7 +205,8 @@ export default class MainGraph {
             .attr("r", "6")
             .style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}})
           .on("mouseover", function(event,d) {
-            d3.select(this).attr("r", 10).style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}});
+            d3.select(this).transition()
+              .duration('200').attr("r", 10).style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}});
             tooltip.transition()
               .duration(200)
               .style("opacity", .9);
@@ -180,12 +215,12 @@ export default class MainGraph {
               .style("top", (event.pageY - 28) + "px");
             })
           .on("mouseout", function() {
-            d3.select(this).attr("r", 6).style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}});
+            d3.select(this).transition()
+              .duration('200').attr("r", 6).style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}});
             tooltip.transition()
               .duration(200)
               .style("opacity", 0);
             });
-          
       })
         
     }

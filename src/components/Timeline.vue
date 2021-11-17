@@ -4,19 +4,19 @@
       <v-row>
         <v-col cols="4" class="d-flex justify-center align-center">
           <div class="pa-2">
-            <h3 class="pb-2">Exemplo</h3>
-            <p>
-            Visualização em Linha do Tempo
-            </p>
-            <label for="ranges">Intervalo  </label>
-            <select id="ranges" name="ranges">
-              <option value="1">1700-1800</option>
-              <option value="2">1800-1900</option>
-              <option value="3">1700-1900</option>
-            </select>
+            <h3 class="pb-2">Visualização de Linhas do Tempo</h3>
+              <p>
+              Organizado por data de nascimento e morte do/da artista
+              </p>
+              
+            </div>
+          </v-col>
+        
+        <div class="outer">
+          <div class="inner"> 
+            <v-col id="my_dataviz" />
           </div>
-        </v-col>
-        <v-col id="my_dataviz" />
+        </div>
       </v-row>
     </v-container>
   </v-app>
@@ -42,3 +42,15 @@ export default {
 }
 };
 </script>
+
+<style>
+.outer {
+    width: auto;
+    height: 600px;
+    overflow: auto;
+}
+.inner {
+    width: 800px;
+    height: 600px;
+}
+</style>
