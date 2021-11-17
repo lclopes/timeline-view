@@ -70,14 +70,40 @@ export default class MainGraph {
         // .style("border-color", "black");
 
         var authors = [...new Set(data.map(d => d.name))];
+        
         var uniqueAuthors = authors.map(function(d) {
           return data.find(function(e) {
             return e.name === d
           })
         })
 
-        var paintings = [...new Set(data.map(d => d.title))];
-        console.log(paintings);
+        // const authorpaintings = authors.map(function(d) {
+        //   const paintings = [];
+        //   for (const authData in data) {
+        //     if(d == authData.name) {
+        //       paintings.push(authData.title);
+        //     }
+        //   }
+        //   return 
+        // });
+        // console.log(authorpaintings)
+        
+        var authorPaintings = [];
+        for (let name of authors) {
+          var entry = []
+          var paintings = [];
+          for (let value of data){
+            if (name == value['name']){
+              paintings.push(value['title']);
+            }
+          }
+          entry = {'name': name, 'paintings':paintings};
+          authorPaintings.push(entry);
+        }
+        
+        console.log(uniqueAuthors)
+
+        // var paintings = [...new Set(data.map(d => d.title))];
         // Lines
         svg.selectAll("myline")
           .data(uniqueAuthors)
@@ -89,26 +115,27 @@ export default class MainGraph {
             .attr("y2", function(d) { return y(d.name); })
             .attr("stroke", function(d){ if (d.birth_year == "Unknown" || d.death_year == "Unknown") {return "white"} else {return "grey"}})
             .attr("stroke-width", "2px")
-          .on("mouseover", function() {
-              var authorPaintings = d3.group(data, d => d.name, d => d.title)
-              console.log(authorPaintings[2])
-              // authorInfo.transition()
-              // .duration(200)
-              // .style("opacity", .9);
-              // authorInfo.html(
-              //   "<%  var i;"+
-              //   "for i in authorPaintings{ %>"+
-              //   "    <div data-role=\"page\" class=\"pages\"  >"+
-              //   "</div>"+
-              //   "}%>"
-              //   )
-              // .style("left", (event.pageX) + "px")
-              // .style("top", (event.pageY - 28) + "px");
-            })
-            //   .style("left", (event.pageX) + "px")
-            //   .style("top", (event.pageY - 28) + "px");
-            // })
-
+          .on("mouseover", function(event, d) {
+            var paintings = []
+            for (let a in authorPaintings){
+              if(a['name'] == d.name){
+                paintings.push(d.title);
+              }
+            }
+            console.log(paintings)
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+              tooltip.html(paintings)
+              .style("left", (event.pageX) + "px")
+              .style("top", (event.pageY - 28) + "px");
+          })
+          .on("mouseout", function() {
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", 0);
+            });
+          
         // Circles of variable 1
         svg.selectAll("mycircle")
           .data(data)
