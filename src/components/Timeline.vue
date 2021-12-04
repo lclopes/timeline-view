@@ -11,7 +11,6 @@
               
             </div>
           </v-col>
-        
         <div class="outer">
           <div class="inner"> 
             <v-col id="my_dataviz" />
@@ -46,7 +45,7 @@ export default {
 <style>
 .outer {
     width: auto;
-    height: 600px;
+    height: auto;
     overflow: auto;
 }
 .inner {

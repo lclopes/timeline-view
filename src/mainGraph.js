@@ -21,7 +21,7 @@ export default class MainGraph {
             .attr("transform",
                   "translate(" + margin.left + "," + margin.top + ")");
         
-        
+      
       this.data.then(function(data){
         console.log(data)
         // Y axis
@@ -30,7 +30,7 @@ export default class MainGraph {
           .range([0, width]);
         svg.append("g")
           .call(d3.axisBottom(x))
-  
+
         // Y axis
         var y = d3.scaleBand()
           .range([ 0, height ])
@@ -42,7 +42,7 @@ export default class MainGraph {
         const yAxisGrid = d3.axisLeft(y).tickSize(-width).tickFormat('').ticks(10);
         svg.append('g')
         .attr('class', 'y axis-grid')
-        .attr('color','#DDD')
+        .attr('color','#FFF')
         .call(yAxisGrid);
 
         // Tooltips
@@ -83,17 +83,6 @@ export default class MainGraph {
             return e.name === d
           })
         })
-
-        // const authorpaintings = authors.map(function(d) {
-        //   const paintings = [];
-        //   for (const authData in data) {
-        //     if(d == authData.name) {
-        //       paintings.push(authData.title);
-        //     }
-        //   }
-        //   return 
-        // });
-        // console.log(authorpaintings)
         
         var authorPaintings = [];
         for (let name of authors) {
@@ -107,9 +96,7 @@ export default class MainGraph {
           entry = {'name': name, 'paintings':paintings};
           authorPaintings.push(entry);
         }
-        
-        console.log(uniqueAuthors)
-
+      
         // var paintings = [...new Set(data.map(d => d.title))];
         // Lines
         svg.selectAll("myline")
@@ -120,44 +107,78 @@ export default class MainGraph {
             .attr("x2", function(d) { if (+d.death_year != "Unknown") {return x(+d.death_year); }})
             .attr("y1", function(d) { return y(d.name); })
             .attr("y2", function(d) { return y(d.name); })
-            .attr("stroke", function(d){ if (d.birth_year == "Unknown" || d.death_year == "Unknown") {return "white"} else {return "#CCC"}})
+            .attr("stroke", function(d){ if (d.birth_year != "Unknown" || d.death_year != "Unknown") {return "#CCC"} })
             .attr("stroke-width", "4px")
-            
-          .on("mouseover", function(event, d) {
-            var paintings = []
-            for (let a in authorPaintings){
-              if(a['name'] == d.name){
-                paintings.push(d.title);
-              }
-            }
-            console.log(paintings)
-            d3.select(this).transition()
-            .duration('400').attr("stroke-width", "8px")
-            authorInfo.transition()
-              .duration(400)
-              .style("opacity", .9);
-              authorInfo.html("As obras vão aparecer aqui")
-              .style("left", (event.pageX) + "px")
-              .style("top", (event.pageY - 28) + "px");
-          })
-          .on("mouseout", function() {
-            d3.select(this).transition()
-            .duration('400').attr("stroke-width", "5px")
-            authorInfo.transition()
-              .duration(400)
-              .style("opacity", 0);
-            });
+
+        // Line gradient configuration
+        svg.append("linearGradient")
+          .data(uniqueAuthors)
+            .attr("id", "line-gradient")
+            .attr("gradientUnits", "userSpaceOnUse")
+            .attr("x1", function(d) { if (+d.birth_year != "Unknown") {return x(+d.birth_year);} else if (+d.birth_year == "Unknown" && +d.death_year != "Unknown") return x(+d.death_year - 80)})
+            .attr("x2", function(d) { if (+d.death_year != "Unknown") {return x(+d.death_year); } else if (+d.death_year == "Unknown" && +d.birth_year != "Unknown") {return x(+d.birth_year + 80)}})
+            .attr("y1", 0)
+            .attr("y2", 0)
+            .selectAll("stop")
+              .data([
+                {offset: "50%", color: "white"},
+                {offset: "100%", color: "black"}
+              ])
+            .enter().append("stop")
+              .attr("offset", function(d) { return d.offset; })
+              .attr("stop-color", function(d) { return d.color; });
+        
+        // Gradient lines for entries with unknown birth/death year
+        svg.selectAll("myline")
+          .data(uniqueAuthors)
+          .enter()
+          .append("line")
+          .attr("x1", function(d) { if (+d.birth_year != "Unknown") {return x(+d.birth_year);} else if (+d.birth_year == "Unknown" && +d.death_year != "Unknown") return x(+d.death_year - 80)})
+          .attr("x2", function(d) { if (+d.death_year != "Unknown") {return x(+d.death_year); } else if (+d.death_year == "Unknown" && +d.birth_year != "Unknown") {return x(+d.birth_year + 80)}})
+            .attr("y1", function(d) { return y(d.name); })
+            .attr("y2", function(d) { return y(d.name); })
+            .attr("stroke", function(d){ if (d.birth_year == "Unknown" || d.death_year == "Unknown") {return "url(#line-gradient)"}})
+            .attr("stroke-width", "6px")
+        
+        // Author names
         svg.selectAll("myline")
           .data(uniqueAuthors)
           .enter()
           .append("text")
-            .attr("x", function(d) { if (+d.birth_year != "Unknown" && +d.death_year != "Unknown") {return x(+d.birth_year) + 20; }})
+            .attr("x", function(d) { if (d.birth_year != "Unknown") {return x(+d.birth_year) + 20; } else if (d.death_year != "Unknown" || d.birth_year == "Unknown") { return  x(+d.death_year - 79 )}})
             .attr("y", function(d) { return y(d.name) -5; })
             .attr('stroke', 'grey')
             .attr("font-weight", 400)
             .style("font-size", 14)
             .text(function(d) { return d.name })
+            .on("mouseover", function(event, d) {
+              d3.select(this).transition()
+              .duration(400).attr('stroke', '#677dAA')
+              authorInfo.transition()
+                .duration(400)
+                .style("opacity", .9);
+                authorInfo.html(d.name+", "+d.birth_year+"-"+d.death_year+"<br>"+"Data de atividade: "+d.active_date)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 28) + "px");
 
+              d3.select(this).enter()
+                .append("div")
+                  .attr("x1", function(d) { if (d.active_date != "Unknown") {return x(d.active_date - 50); } else { return }})
+                  .attr("x2", function(d) { if (d.active_date != "Unknown") {return x(d.active_date + 50); } else { return }})
+                  .attr("y1", function(d) { return y(d.name); })
+                  .attr("y2", function(d) { return y(d.name); })
+                  .style("stroke", function(d){if (d.active_date != "Unknown"){ return "#00FFFF"} else {return "#bbbbbb"}})
+                  .attr("stroke-width", "4px")
+            })
+            .on("mouseout", function() {
+              d3.select(this).transition()
+              .duration(400).attr('stroke', 'grey')
+              authorInfo.transition()
+                .duration(400)
+                .style("opacity", 0);
+              });
+
+        // Background lines
         svg.selectAll("myline")
             .data(uniqueAuthors)
             .enter()
@@ -172,7 +193,7 @@ export default class MainGraph {
           .data(uniqueAuthors)
           .enter()
           .append("circle")
-            .attr("cx", function(d) { if (d.birth_year != "Unknown") {return x(+d.birth_year); } else { return }})
+            .attr("cx", function(d) { if (d.birth_year != "Unknown") {return x(+d.birth_year); } else if (d.death_year != "Unknown" || d.birth_year == "Unknown") { return  x(+d.death_year - 80)}})
             .attr("cy", function(d) { return y(d.name); })
             .attr("r", "6")
             .style("fill", function(d){if (d.birth_year != "Unknown"){ return "#69b3a2"} else {return "#bbbbbb"}})
@@ -196,11 +217,10 @@ export default class MainGraph {
           
         // Circles of variable 2
         svg.selectAll("mycircle")
-        
           .data(uniqueAuthors)
           .enter()
           .append("circle")
-            .attr("cx", function(d) { if (d.death_year != "Unknown") {return x(+d.death_year); } else { return }})
+            .attr("cx", function(d) { if (d.death_year != "Unknown") {return x(+d.death_year); } else if (d.death_year == "Unknown" || d.birth_year != "Unknown") { return  x(+d.birth_year + 80)}})
             .attr("cy", function(d) { return y(d.name); })
             .attr("r", "6")
             .style("fill", function(d){if (d.death_year != "Unknown"){ return "#4C4082"} else {return "#bbbbbb"}})
