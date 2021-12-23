@@ -72,7 +72,7 @@ class Painting:
 ## AUTHOR CLASS ##
 # This class holds the authors' information generated after the application of the regular expressions.
 class Author:
-    def __init__(self, recordNumber, name, birthYear, deathYear, title, activeDate, details, technique, medium):
+    def __init__(self, recordNumber, name, birthYear, deathYear, title, activeDate, details, technique, medium, paintingCount):
         self.recordNumber = recordNumber
         self.name = name
         self.birthYear = birthYear
@@ -82,6 +82,7 @@ class Author:
         self.details = details
         self.technique = technique
         self.medium = medium
+        self.paintingCount = paintingCount
  
 ## RECORD CLASS ##
 # This class holds all the paintings.
@@ -97,7 +98,7 @@ def arrayToString(a):
 # write object read from csv to new csv
 def writeFile(records,authors):
     with open('exit.csv', mode='w', newline='') as file:
-        fieldnames = ['record_number','name','birth_year','death_year','active_date','details','title','technique','medium']
+        fieldnames = ['record_number','name','birth_year','death_year','active_date','details','title','technique','medium','painting_count']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -107,7 +108,8 @@ def writeFile(records,authors):
             'details':('None' if len(authors[i].details) == 0 else arrayToString(authors[i].details) ),
             'title': authors[i].title,
             'technique': authors[i].technique,
-            'medium': authors[i].medium})
+            'medium': authors[i].medium,
+            'painting_count': authors[i].paintingCount})
 
 # read from file and storing in data structures
 # save file in csv
@@ -117,17 +119,29 @@ def readAndSave(file):
     with open (file, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         line_count = 0
+        painting_count_per_author = 0;
+        prev_author_name = ''
         for row in reader:
             if line_count == 0:
                 line_count += 1
             else:
-                a = Author('','','','', '', '', '', '', '')
+                a = Author('','','','', '', '', '', '', '','')
                 p = Painting(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9])
                 a.recordNumber = row[0]
                 if(p.setAuthorName(row[1]) == "Anonymous"):
                     a.name = row[1]
                 else:
                     a.name = p.setAuthorName(row[1])
+
+                if line_count == 1:
+                    prev_author_name = a.name
+                    
+                if a.name == prev_author_name:
+                    painting_count_per_author += 1
+
+                elif line_count > 1 and a.name != prev_author_name:
+                    prev_author_name = a.name
+                
                 a.birthYear = p.setAuthorBirthYear(row[1])
                 a.deathYear = p.setAuthorDeathYear(row[1])
                 a.activeDate = p.setActive(row[1])
@@ -135,7 +149,14 @@ def readAndSave(file):
                 a.title = row[2]
                 a.technique = row[3]
                 a.medium = row[5]
+            
+                # if(len(authors) > 0 and a.name == prev_author_name):
+                #     # painting_count_per_author += 1
+                # else:
+                #     painting_count_per_author = 0
+                #     prev_author_name = ''
                 
+                a.paintingCount = painting_count_per_author;
                 records.paintings.append(p)
                 authors.append(a)
                 line_count += 1
@@ -154,6 +175,7 @@ def readAndSave(file):
             print("TECHNIQUE >>>>> ", authors[i].technique)
             print("MEDIUM >>>>> ", authors[i].medium)
             print("TITLE >>>>> ", authors[i].title)
+            print("PAINTING COUNT >>>>> ", authors[i].paintingCount)
             print('')
 
 ## run inside /src folder: python main.py            

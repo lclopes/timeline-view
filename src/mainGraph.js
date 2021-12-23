@@ -9,28 +9,31 @@ export default class MainGraph {
     createGraph() {
         // set the dimensions and margins of the graph
         var margin = {top: 10, right: 0, bottom: 30, left: 30},
-            width = 1400 - margin.left - margin.right,
-            height = 1600 - margin.top - margin.bottom;
+            width = 1800 - margin.left - margin.right,
+            height = 1400 - margin.top - margin.bottom;
   
         // append the svg object to the body of the page
-        var svg = d3.select("#my_dataviz")
-          .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform",
-                  "translate(" + margin.left + "," + margin.top + ")");
-        
+        const svg = d3.select("#my_dataviz").
+        append('svg').
+        attr('width', width + margin.left + margin.right).
+        attr('height', height + margin.top + margin.bottom).
+        call(responsivefy) // Call responsivefy to make the chart responsive
+            .append('g').
+        attr('transform', `translate(${margin.left}, ${margin.top})`)
       
       this.data.then(function(data){
         console.log(data)
         // X axis
         var x = d3.scaleLinear()
-          .domain([1700, 1970])
+          .domain([1500, 2000])
           .range([0, width]);
-        svg.append("g")
-          .call(d3.axisBottom(x))
 
+        var xAxis = d3.axisBottom(x);
+        
+        svg.append("g")
+          .call(xAxis)
+
+      
         // Y axis
         var y = d3.scaleBand()
           .range([ 0, height ])
@@ -38,7 +41,7 @@ export default class MainGraph {
           .padding(1);
         // svg.append("g")
         //   .call(d3.axisLeft(y))
-
+        
         // const yAxisGrid = d3.axisLeft(y).tickSize(-width).tickFormat('').ticks(10);
         // svg.append('g')
         // .attr('class', 'y axis-grid')
@@ -110,39 +113,39 @@ export default class MainGraph {
             .attr("stroke", function(d){ if (d.birth_year != "Unknown" && d.death_year != "Unknown") {return "#CCC"} })
             .attr("stroke-width", "4px")
         
-        svg.append("linearGradient")
-          .data(uniqueAuthors)
-          .attr("id", "line-gradient")
-          .attr("gradientUnits", "userSpaceOnUse")
-          .attr("x1", function(d) { return x(x1(d)) })
-          .attr("x2", function(d) { return x(x2(d)) })
-          .attr("y1", 0)
-          .attr("y2", 0)
-          .selectAll("stop")
-            .data([
-              {offset: "0%", color: "blue"},
-              {offset: "100%", color: "red"}
-            ])
-          .enter().append("stop")
-            .attr("offset", function(d) { return d.offset; })
-            .attr("stop-color", function(d) { return d.color; });
+        // svg.append("linearGradient")
+        //   .data(uniqueAuthors)
+        //   .attr("id", "line-gradient")
+        //   .attr("gradientUnits", "userSpaceOnUse")
+        //   .attr("x1", function(d) { return x(x1(d)) })
+        //   .attr("x2", function(d) { return x(x2(d)) })
+        //   .attr("y1", 0)
+        //   .attr("y2", 0)
+        //   .selectAll("stop")
+        //     .data([
+        //       {offset: "0%", color: "blue"},
+        //       {offset: "100%", color: "red"}
+        //     ])
+        //   .enter().append("stop")
+        //     .attr("offset", function(d) { return d.offset; })
+        //     .attr("stop-color", function(d) { return d.color; });
 
-        svg.append("linearGradient")
-          .data(uniqueAuthors)
-          .attr("id", "line-gradient-2")
-          .attr("gradientUnits", "userSpaceOnUse")
-          .attr("x1", function(d) { return x(x1(d)) })
-          .attr("x2", function(d) { return x(x2(d)) })
-          .attr("y1", 0)
-          .attr("y2", 0)
-          .selectAll("stop")
-            .data([
-              {offset: "0%", color: "red"},
-              {offset: "100%", color: "white"}
-            ])
-          .enter().append("stop")
-            .attr("offset", function(d) { return d.offset; })
-            .attr("stop-color", function(d) { return d.color; });
+        // svg.append("linearGradient")
+        //   .data(uniqueAuthors)
+        //   .attr("id", "line-gradient-2")
+        //   .attr("gradientUnits", "userSpaceOnUse")
+        //   .attr("x1", function(d) { return x(x1(d)) })
+        //   .attr("x2", function(d) { return x(x2(d)) })
+        //   .attr("y1", 0)
+        //   .attr("y2", 0)
+        //   .selectAll("stop")
+        //     .data([
+        //       {offset: "0%", color: "red"},
+        //       {offset: "100%", color: "white"}
+        //     ])
+        //   .enter().append("stop")
+        //     .attr("offset", function(d) { return d.offset; })
+        //     .attr("stop-color", function(d) { return d.color; });
 
         // Gradient lines for entries with unknown birth/death year
         svg.selectAll("myline")
@@ -237,7 +240,7 @@ export default class MainGraph {
           .data(uniqueAuthors)
           .enter()
           .append("circle")
-            .attr("cx", function(d) { if (d.birth_year != "Unknown") {return x(+d.birth_year); } else if (d.death_year != "Unknown" || d.birth_year == "Unknown") { return  x(+d.death_year - 80)}})
+            .attr("cx", function(d) { if (d.birth_year != "Unknown") {return x(+d.birth_year); } else if (d.death_year != "Unknown" || d.birth_year == "Unknown") { return  }})
             .attr("cy", function(d) { return y(d.name); })
             .attr("r", "6")
             .style("fill", function(d){if (d.birth_year == "Unknown" && d.death_year == "Unknown") {return "#FFF" } else return dotColor(d.birth_year, "#38c92a")})
@@ -256,7 +259,7 @@ export default class MainGraph {
             .attr("cx", function(d) { if (d.death_year != "Unknown") {return x(+d.death_year); } else if (d.death_year == "Unknown" || d.birth_year != "Unknown") { return  x(+d.birth_year + 80)}})
             .attr("cy", function(d) { return y(d.name); })
             .attr("r", "6")
-            .style("fill", function(d){if (d.death_year != "Unknown"){ return "#bf1321"} else {return "#fff"}})
+            .style("fill", function(d){if (d.death_year == "Unknown" && d.birth_year == "Unknown"){ return "#FFF"} else return dotColor(d.death_year, "#bf1321")})
           .on("mouseover", function(event,d) {
             mouseover(this, event,"Ano de morte", d.death_year, tooltip)
           })
@@ -347,3 +350,31 @@ function dotColor(data, color){
     return "#FFF"
   }
 }
+
+function responsivefy(svg) {
+             
+  // Container is the DOM element, svg is appended.
+  // Then we measure the container and find its
+  // aspect ratio.
+  const container = d3.select(svg.node().parentNode),
+      width = parseInt(svg.style('width'), 10),
+      height = parseInt(svg.style('height'), 10),
+      aspect = width / height;
+       
+  // Add viewBox attribute to set the value to initial size
+  // add preserveAspectRatio attribute to specify how to scale
+  // and call resize so that svg resizes on page load
+  svg.attr('viewBox', `0 0 ${width} ${height}`).
+  attr('preserveAspectRatio', 'xMinYMid').
+  call(resize);
+   
+  d3.select(window).on('resize.' + container.attr('id'), resize);
+
+  function resize() {
+      const targetWidth = parseInt(container.style('width'));
+      svg.attr('width', targetWidth);
+      svg.attr('height', Math.round(targetWidth / aspect));
+  }
+}
+
+

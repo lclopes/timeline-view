@@ -1,23 +1,29 @@
+<script src="https://unpkg.com/vue@3"></script>
+<script src="https://unpkg.com/vue-router@4"></script>
+
 <template>
   <v-app>
     <v-container>
-      <v-row>
-        <v-col cols="4" class="d-flex justify-center align-center">
+      <v-row>          
+        <div class="outer">
+          <v-col cols="4" class="d-flex justify-center align-center">
           <div class="pa-2">
             <h3 class="pb-2">Visualização de Linhas do Tempo</h3>
               <p>
               Organizado por data de nascimento e morte do/da artista
               </p>
-              
             </div>
           </v-col>
-        <div class="outer">
           <div class="inner"> 
-            <v-col id="my_dataviz" />
+            <div id="LPUgraph">
+              <v-col id="my_dataviz" />
+            </div>
           </div>
         </div>
+        <router-view></router-view>
       </v-row>
     </v-container>
+     
   </v-app>
 </template>
 
@@ -36,9 +42,9 @@ export default {
     async createGraph(data) {
       var g = new MainGraph(data);
       g.createGraph();
-    }
-    
-}
+    },
+
+  }
 };
 </script>
 
@@ -49,7 +55,34 @@ export default {
     overflow: auto;
 }
 .inner {
-    width: 800px;
-    height: 600px;
+    width: 100%;
+    height: 100%;
+}
+#LPUgraph{
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.svg-container {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+}
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+}
+
+.zoom {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
 }
 </style>
