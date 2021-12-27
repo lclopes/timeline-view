@@ -7,12 +7,17 @@
       <v-row>          
         <div class="outer">
           <v-col cols="4" class="d-flex justify-center align-center">
-          <div class="pa-2">
-            <h3 class="pb-2">Visualização de Linhas do Tempo</h3>
-              <p>
-              Organizado por data de nascimento e morte do/da artista
-              </p>
+            <div class="pa-2">
+              <h3 class="pb-2">Visualização de Linhas do Tempo</h3>
+                <p>
+                Organizado por data de nascimento e morte do/da artista
+                </p>
             </div>
+            Filtrar por técnicas de pintura:
+            <select id="selectButton"></select>
+            Escala (início/fim):
+            <input type="number" id="buttonXstart" value=1500>
+            <input type="number" id="buttonXend" value=2000>
           </v-col>
           <div class="inner"> 
             <div id="LPUgraph">
