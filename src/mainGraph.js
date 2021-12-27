@@ -62,12 +62,15 @@ export default class MainGraph {
         // Create new data with the selection?
         var dataFilter = data.filter(function (d) { return d.technique == selectedGroup })
 
+        // Remove previous data
         d3.selectAll("g > *").remove();
 
         // Give these new data to update line
         if (selectedGroup == 'Todos') {
+          // add new data
           drawGraph(data);
         } else {
+          // add new data
           drawGraph(dataFilter);
         }
 
@@ -90,6 +93,8 @@ export default class MainGraph {
         // Update X axis
         x.domain([xStart, xEnd])
         xAxis.transition().duration(1000).call(d3.axisBottom(x));
+
+        // Remove previous data
         d3.selectAll("g > *").remove();
 
         // Update chart
@@ -105,6 +110,8 @@ export default class MainGraph {
         // Update X axis
         x.domain([xStart, xEnd])
         xAxis.transition().duration(1000).call(d3.axisBottom(x));
+
+        // Remove previous data
         d3.selectAll("g > *").remove();
 
         // Update chart
