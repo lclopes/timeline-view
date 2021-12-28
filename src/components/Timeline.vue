@@ -20,12 +20,9 @@
             <input type="number" id="buttonXend" value=2000>
           </v-col>
           <div class="inner"> 
-            <div id="LPUgraph">
-              <v-col id="my_dataviz" />
-            </div>
+            <v-col id="my_dataviz" />
           </div>
         </div>
-        <router-view></router-view>
       </v-row>
     </v-container>
      
@@ -60,10 +57,6 @@ export default {
     overflow: auto;
 }
 .inner {
-    width: 100%;
-    height: 100%;
-}
-#LPUgraph{
     display: block;
     width: 100%;
     height: 100%;

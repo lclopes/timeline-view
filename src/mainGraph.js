@@ -53,7 +53,7 @@ export default class MainGraph {
         .domain(data.map(function (d) { return d.name; }))
         .padding(2);
 
-      // creating chart
+      // create chart
       drawGraph(data);
 
       // redraw chart
@@ -84,7 +84,7 @@ export default class MainGraph {
         updateTechnique(selectedOption)
       })
 
-      // A function that update the plot for a given xlim value
+      // A function that update the plot for a given value
       function updateStartYearScale() {
 
         // Get the value of the button
@@ -101,7 +101,7 @@ export default class MainGraph {
         drawGraph(data);
       }
 
-      // A function that update the plot for a given xlim value
+      // A function that update the plot for a given value
       function updateEndYearScale() {
 
         // Get the value of the button
@@ -160,7 +160,7 @@ export default class MainGraph {
           .style("position", "absolute")
           .style("text-align", "center")
           .style("width", "200px")
-          .style("height", "38px")
+          .style("height", "56px")
           .style("padding", "8px")
           .style("font", "12px sans-serif")
           .style("pointer-events", "none")
@@ -188,7 +188,7 @@ export default class MainGraph {
           .attr("y1", function (d) { return y(d.name); })
           .attr("y2", function (d) { return y(d.name); })
           .attr("stroke", function (d) {
-            if (d.birth_year != "Unknown" && d.death_year != "Unknown") { return "#e3b3d5" }
+            if (d.birth_year != "Unknown" && d.death_year != "Unknown") { return "#bba7c2" }
           })
           .attr("stroke-width", "6px")
 
@@ -262,11 +262,11 @@ export default class MainGraph {
               .style("opacity", .9);
             authorInfo.html(function () {
               if (d.active_date == "Unknown") {
-                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica de pintura: ' + d.technique
+                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica de pintura: ' + d.technique + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
               } else if (d.birth_year == "Unknown" || d.death_year == "Unknown") {
-                return d.name + "<br>" + "Data de atividade: " + d.active_date + '<br> Técnica de pintura: ' + d.technique
+                return d.name + "<br>" + "Data de atividade: " + d.active_date + '<br> Técnica de pintura: ' + d.technique + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
               } else {
-                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica de pintura: ' + d.technique + "<br> Data de atividade: " + d.active_date
+                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica de pintura: ' + d.technique + "<br> Data de atividade: " + d.active_date + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
               }
             }
 
