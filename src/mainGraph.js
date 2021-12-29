@@ -1,4 +1,6 @@
 import * as d3 from "d3";
+import Colors from "./colors.js"
+
 export default class MainGraph {
   constructor(data) {
     this.data = data;
@@ -123,11 +125,11 @@ export default class MainGraph {
       d3.select("#buttonXstart").on("input", updateStartYearScale);
       d3.select("#buttonXend").on("input", updateEndYearScale);
 
-      // function to create chart
+      // function to create chart /////////////////////////////// main code here //////////////////////////////
       function drawGraph(data) {
         // X axis
         var x = d3.scaleLinear()
-          .domain([xStart, xEnd])
+          .domain([xStart, xEnd]).nice()
           .range([0, width]);
 
         xAxis = svg.append("g")
@@ -138,6 +140,11 @@ export default class MainGraph {
           .range([0, height])
           .domain(data.map(function (d) { return d.name; }))
           .padding(2);
+
+        // var rangeNames = d3.rollup(data, v => v.length, d => d.name);
+        let lineColor = d3.scaleOrdinal().domain(d3.rollup(data, v => v.length, d => d.name)).range(["grey","black"])
+
+        console.log(lineColor(15));
 
         // Tooltips
         var tooltip = d3.select("body").append("div")
@@ -160,7 +167,7 @@ export default class MainGraph {
           .style("position", "absolute")
           .style("text-align", "center")
           .style("width", "200px")
-          .style("height", "56px")
+          .style("height", "65px")
           .style("padding", "8px")
           .style("font", "12px sans-serif")
           .style("pointer-events", "none")
@@ -188,7 +195,7 @@ export default class MainGraph {
           .attr("y1", function (d) { return y(d.name); })
           .attr("y2", function (d) { return y(d.name); })
           .attr("stroke", function (d) {
-            if (d.birth_year != "Unknown" && d.death_year != "Unknown") { return "#bba7c2" }
+            if (d.birth_year != "Unknown" && d.death_year != "Unknown") { return Colors.standardLine() }
           })
           .attr("stroke-width", "6px")
 
@@ -201,7 +208,7 @@ export default class MainGraph {
           .attr("x2", function (d) { return x(x2(d)) })
           .attr("y1", function (d) { return y(d.name); })
           .attr("y2", function (d) { return y(d.name); })
-          .attr("stroke", function (d) { if (d.birth_year == "Unknown") { return "#ef7fa3" } else if (d.death_year == "Unknown") { return "#93abe3" } })
+          .attr("stroke", function (d) { if (d.birth_year == "Unknown") { return Colors.unknownBirthLine() } else if (d.death_year == "Unknown") { return Colors.unknownDeathLine() } })
           .attr("stroke-width", "6px")
 
         // Lines for active date entries
@@ -213,12 +220,12 @@ export default class MainGraph {
           .attr("x2", function (d) { return x(x2ActiveDate(d)) })
           .attr("y1", function (d) { return y(d.name); })
           .attr("y2", function (d) { return y(d.name); })
-          .attr("stroke", function () { return "#bba7c2" })
+          .attr("stroke", function () { return Colors.activeDateLine() })
           .attr("stroke-width", "4px")
           .style("stroke-dasharray", ("3, 3"))
           .on("mouseover", function (event, d) {
             d3.select(this).transition()
-              .duration(400).attr('stroke', '#bba7c2').attr("stroke-width", "8px")
+              .duration(400).attr('stroke', Colors.activeDateLine()).attr("stroke-width", "8px")
             authorInfo.transition()
               .duration(400)
               .style("opacity", .9);
@@ -232,12 +239,12 @@ export default class MainGraph {
               .attr("x2", function (d) { if (d.active_date != "Unknown") { return x(d.active_date + 20); } else { return } })
               .attr("y1", function (d) { return y(d.name); })
               .attr("y2", function (d) { return y(d.name); })
-              .style("stroke", function (d) { if (d.active_date != "Unknown") { return "#bba7c2" } else { return "#cccccc" } })
+              .style("stroke", function (d) { if (d.active_date != "Unknown") { return Colors.activeDateLine() } else { return Colors.blank() } })
               .attr("stroke-width", "4px")
           })
           .on("mouseout", function () {
             d3.select(this).transition()
-              .duration(400).attr('stroke', '#bba7c2').attr("stroke-width", "4px")
+              .duration(400).attr('stroke', Colors.activeDateLine()).attr("stroke-width", "4px")
             authorInfo.transition()
               .duration(400)
               .style("opacity", 0);
@@ -256,7 +263,7 @@ export default class MainGraph {
           .text(function (d) { return d.name })
           .on("mouseover", function (event, d) {
             d3.select(this).transition()
-              .duration(400).attr('stroke', '#677dAA')
+              .duration(400).attr('stroke', Colors.authorNameHovered())
             authorInfo.transition()
               .duration(400)
               .style("opacity", .9);
@@ -273,15 +280,6 @@ export default class MainGraph {
             )
               .style("left", (event.pageX) + "px")
               .style("top", (event.pageY - 28) + "px");
-
-            d3.select(this).enter()
-              .append("div")
-              .attr("x1", function (d) { if (d.active_date != "Unknown") { return x(d.active_date - 50); } else { return } })
-              .attr("x2", function (d) { if (d.active_date != "Unknown") { return x(d.active_date + 50); } else { return } })
-              .attr("y1", function (d) { return y(d.name); })
-              .attr("y2", function (d) { return y(d.name); })
-              .style("stroke", function (d) { if (d.active_date != "Unknown") { return "#00FFFF" } else { return "#bbbbbb" } })
-              .attr("stroke-width", "4px")
           })
           .on("mouseout", function () {
             d3.select(this).transition()
@@ -299,7 +297,7 @@ export default class MainGraph {
           .attr("cx", function (d) { if (d.birth_year != "Unknown") { return x(+d.birth_year); } else if (d.death_year != "Unknown" || d.birth_year == "Unknown") { return } })
           .attr("cy", function (d) { return y(d.name); })
           .attr("r", "6")
-          .style("fill", function (d) { if (d.birth_year == "Unknown" && d.death_year == "Unknown") { return "#FFF" } else return dotColor(d.birth_year, "#0692cf") })
+          .style("fill", function (d) { if (d.birth_year == "Unknown" && d.death_year == "Unknown") { return "#FFF" } else return dotColor(d.birth_year, Colors.birthCircle()) })
           .on("mouseover", function (event, d) {
             mouseover(this, event, "Ano de nascimento", d.birth_year, tooltip)
           })
@@ -315,7 +313,7 @@ export default class MainGraph {
           .attr("cx", function (d) { if (d.death_year != "Unknown") { return x(+d.death_year); } else if (d.death_year == "Unknown" || d.birth_year != "Unknown") { return x(+d.birth_year + 80) } })
           .attr("cy", function (d) { return y(d.name); })
           .attr("r", "6")
-          .style("fill", function (d) { if (d.death_year == "Unknown" && d.birth_year == "Unknown") { return "#FFF" } else return dotColor(d.death_year, "#de425b") })
+          .style("fill", function (d) { if (d.death_year == "Unknown" && d.birth_year == "Unknown") { return "#FFF" } else return dotColor(d.death_year, Colors.deathCircle()) })
           .on("mouseover", function (event, d) {
             mouseover(this, event, "Ano de morte", d.death_year, tooltip)
           })
