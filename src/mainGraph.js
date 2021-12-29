@@ -143,6 +143,17 @@ export default class MainGraph {
 
 
       ///////////////////// TODO: COLOR GRADIENT BY NUMBER OF PAINTINGS BY AUTHOR /////////////////////////////////
+        var namesExtent = [1,12];
+
+        let colorScale = d3.scaleSequential().range(Colors.standardScale()).domain(namesExtent);
+        let colorScaleUnknownBirth = d3.scaleSequential().range(Colors.unknownBirthScale()).domain(namesExtent);
+        let colorScaleUnknownDeath = d3.scaleSequential().range(Colors.unknownDeathScale()).domain(namesExtent);
+        
+        // var group = d3.group(data, d => d.name, d => d.technique);
+        // // var valuesGroup = group.values();
+        
+        // console.log(group.get("Folwell, Samuel").keys());
+        // console.log(d3.extent(group.get(data, d => d.name)))
         // var rangeNames = d3.rollup(data, v => v.length, d => d.name);
         // let lineColor = d3.scaleOrdinal().domain(rangeNames.values).range(["grey","black"])
         // console.log(lineColor)
@@ -195,8 +206,9 @@ export default class MainGraph {
           .attr("x2", function (d) { return x(d.death_year); })
           .attr("y1", function (d) { return y(d.name); })
           .attr("y2", function (d) { return y(d.name); })
+          .style("position","relative")
           .attr("stroke", function (d) {
-            if (d.birth_year != "Unknown" && d.death_year != "Unknown") { return Colors.standardLine() }
+            if (d.birth_year != "Unknown" && d.death_year != "Unknown") { return colorScale(d3.group(data, d => d.name).get(d.name).length) }
           })
           .attr("stroke-width", "6px")
 
@@ -209,7 +221,7 @@ export default class MainGraph {
           .attr("x2", function (d) { return x(x2(d)) })
           .attr("y1", function (d) { return y(d.name); })
           .attr("y2", function (d) { return y(d.name); })
-          .attr("stroke", function (d) { if (d.birth_year == "Unknown") { return Colors.unknownBirthLine() } else if (d.death_year == "Unknown") { return Colors.unknownDeathLine() } })
+          .attr("stroke", function (d) { if (d.birth_year == "Unknown") { return colorScaleUnknownBirth(d3.group(data, d => d.name).get(d.name).length) } else if (d.death_year == "Unknown") { return colorScaleUnknownDeath(d3.group(data, d => d.name).get(d.name).length) } })
           .attr("stroke-width", "6px")
 
         // Lines for active date entries
@@ -270,11 +282,11 @@ export default class MainGraph {
               .style("opacity", .9);
             authorInfo.html(function () {
               if (d.active_date == "Unknown") {
-                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica de pintura: ' + d.technique + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
+                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.technique).get(d.name).keys()) + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
               } else if (d.birth_year == "Unknown" || d.death_year == "Unknown") {
-                return d.name + "<br>" + "Data de atividade: " + d.active_date + '<br> Técnica de pintura: ' + d.technique + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
+                return d.name + "<br>" + "Data de atividade: " + d.active_date + '<br> Técnica(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.technique).get(d.name).keys()) + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
               } else {
-                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica de pintura: ' + d.technique + "<br> Data de atividade: " + d.active_date + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
+                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.technique).get(d.name).keys()) + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length + "<br> Data de atividade: " + d.active_date
               }
             }
 
@@ -436,4 +448,11 @@ function responsivefy(svg) {
 
 }
 
-
+// function getTechniques(group) {
+//   let values = []
+//   group.forEach((value) => {
+//     values.push(value)
+//   })
+//   console.log(values)
+//   return values;
+// }

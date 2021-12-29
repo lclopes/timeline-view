@@ -78,9 +78,8 @@ export default {
     left: 0;
 }
 
-.zoom {
-  cursor: move;
-  fill: none;
-  pointer-events: all;
+.lineStyle {
+    position: fixed;
+    top: 0;
 }
 </style>

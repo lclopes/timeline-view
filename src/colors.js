@@ -34,4 +34,16 @@ export default class Colors {
     static deathCircle() {
         return "#de425b"
     }
+
+    static standardScale(){
+        return ["#ffe0ff","#a98fff"]
+    }
+
+    static unknownBirthScale(){
+        return ["#ffb7ce","#de425b"]
+    }
+
+    static unknownDeathScale(){
+        return ["#b8d0e6","#0692cf"]
+    }
 }
