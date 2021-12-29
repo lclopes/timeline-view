@@ -129,7 +129,7 @@ export default class MainGraph {
       function drawGraph(data) {
         // X axis
         var x = d3.scaleLinear()
-          .domain([xStart, xEnd]).nice()
+          .domain([xStart, xEnd])
           .range([0, width]);
 
         xAxis = svg.append("g")
@@ -143,10 +143,9 @@ export default class MainGraph {
 
 
       ///////////////////// TODO: COLOR GRADIENT BY NUMBER OF PAINTINGS BY AUTHOR /////////////////////////////////
-        var rangeNames = d3.rollup(data, v => v.length, d => d.name);
-        let lineColor = d3.scaleOrdinal().domain(rangeNames.values).range(["grey","black"])
-
-        console.log(lineColor)
+        // var rangeNames = d3.rollup(data, v => v.length, d => d.name);
+        // let lineColor = d3.scaleOrdinal().domain(rangeNames.values).range(["grey","black"])
+        // console.log(lineColor)
 
         // Tooltips
         var tooltip = d3.select("body").append("div")
