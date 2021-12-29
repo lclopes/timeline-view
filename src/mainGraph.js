@@ -141,10 +141,12 @@ export default class MainGraph {
           .domain(data.map(function (d) { return d.name; }))
           .padding(2);
 
-        // var rangeNames = d3.rollup(data, v => v.length, d => d.name);
-        let lineColor = d3.scaleOrdinal().domain(d3.rollup(data, v => v.length, d => d.name)).range(["grey","black"])
 
-        console.log(lineColor(15));
+      ///////////////////// TODO: COLOR GRADIENT BY NUMBER OF PAINTINGS BY AUTHOR /////////////////////////////////
+        var rangeNames = d3.rollup(data, v => v.length, d => d.name);
+        let lineColor = d3.scaleOrdinal().domain(rangeNames.values).range(["grey","black"])
+
+        console.log(lineColor)
 
         // Tooltips
         var tooltip = d3.select("body").append("div")
