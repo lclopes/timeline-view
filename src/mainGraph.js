@@ -11,17 +11,22 @@ export default class MainGraph {
   createGraph() {
     // set the dimensions and margins of the graph
     var margin = { top: 10, right: 30, bottom: 30, left: 30 },
-      width = 1800 - margin.left - margin.right,
-      height = 1800 - margin.top - margin.bottom;
+      width = 1500 - margin.left - margin.right,
+      height = 1600 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
-    const svg = d3.select("#my_dataviz").
-      append('svg').
-      attr('width', width + margin.left + margin.right).
-      attr('height', height + margin.top + margin.bottom).
-      call(responsivefy) // Call responsivefy to make the chart responsive
-      .append('g').
-      attr('transform', `translate(${margin.left}, ${margin.top})`)
+    var svg = d3.select("#my_dataviz")
+      .append('svg')
+      .attr("viewBox", [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom])
+      // .attr('width', width + margin.left + margin.right)
+      // .attr('height', height + margin.top + margin.bottom)
+
+      // .call(responsivefy) // Call responsivefy to make the chart responsive
+      .append("g")
+      .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+    var xAxis = d3.select("#my_dataviz")
+      .append("g");
 
     // asynchronous function to draw graph based on csv
     this.data.then(function (data) {
@@ -46,14 +51,11 @@ export default class MainGraph {
         .domain([xStart, xEnd])
         .range([0, width]);
 
-      var xAxis = svg.append("g")
-        .call(d3.axisBottom(x));
-
       // Y axis
       var y = d3.scaleBand()
-        .range([0, height])
+        .range([0, data.length])
         .domain(data.map(function (d) { return d.name; }))
-        .padding(2);
+
 
       // create chart
       drawGraph(data);
@@ -137,21 +139,34 @@ export default class MainGraph {
 
         // Y axis
         y = d3.scaleBand()
-          .range([0, height])
+          .range([50, height])
           .domain(data.map(function (d) { return d.name; }))
-          .padding(2);
+          .paddingOuter(0.2)
+          .align(0)
 
+        // svg.append("g")
+        //   .call(d3.axisLeft(y))
+        //   .attr("y", 6)
 
-      ///////////////////// TODO: COLOR GRADIENT BY NUMBER OF PAINTINGS BY AUTHOR /////////////////////////////////
-        var namesExtent = [1,12];
+        // svg.call(d3.zoom()
+        //   .extent([[0, 0], [width, height]])
+        //   .scaleExtent([1, 8])
+        //   .on("zoom", zoomed));
+
+        // function zoomed({ transform }) {
+        //   svg.attr("transform", transform);
+        // }
+
+        ///////////////////// TODO: COLOR GRADIENT BY NUMBER OF PAINTINGS BY AUTHOR /////////////////////////////////
+        var namesExtent = [1, 12];
 
         let colorScale = d3.scaleSequential().range(Colors.standardScale()).domain(namesExtent);
         let colorScaleUnknownBirth = d3.scaleSequential().range(Colors.unknownBirthScale()).domain(namesExtent);
         let colorScaleUnknownDeath = d3.scaleSequential().range(Colors.unknownDeathScale()).domain(namesExtent);
-        
+
         // var group = d3.group(data, d => d.name, d => d.technique);
         // // var valuesGroup = group.values();
-        
+
         // console.log(group.get("Folwell, Samuel").keys());
         // console.log(d3.extent(group.get(data, d => d.name)))
         // var rangeNames = d3.rollup(data, v => v.length, d => d.name);
@@ -206,7 +221,7 @@ export default class MainGraph {
           .attr("x2", function (d) { return x(d.death_year); })
           .attr("y1", function (d) { return y(d.name); })
           .attr("y2", function (d) { return y(d.name); })
-          .style("position","relative")
+          .style("position", "relative")
           .attr("stroke", function (d) {
             if (d.birth_year != "Unknown" && d.death_year != "Unknown") { return colorScale(d3.group(data, d => d.name).get(d.name).length) }
           })
@@ -234,7 +249,7 @@ export default class MainGraph {
           .attr("y1", function (d) { return y(d.name); })
           .attr("y2", function (d) { return y(d.name); })
           .attr("stroke", function () { return Colors.activeDateLine() })
-          .attr("stroke-width", "4px")
+          .attr("stroke-width", "6px")
           .style("stroke-dasharray", ("3, 3"))
           .on("mouseover", function (event, d) {
             d3.select(this).transition()
@@ -253,7 +268,7 @@ export default class MainGraph {
               .attr("y1", function (d) { return y(d.name); })
               .attr("y2", function (d) { return y(d.name); })
               .style("stroke", function (d) { if (d.active_date != "Unknown") { return Colors.activeDateLine() } else { return Colors.blank() } })
-              .attr("stroke-width", "4px")
+              .attr("stroke-width", "6px")
           })
           .on("mouseout", function () {
             d3.select(this).transition()
@@ -271,8 +286,8 @@ export default class MainGraph {
           .attr("x", function (d) { if (d.birth_year != "Unknown") { return x(+d.birth_year) + 20; } else if (d.death_year != "Unknown" && d.birth_year == "Unknown") { return x(+d.death_year - 80) } else if (d.active_date != "Unknown") { return x(x1ActiveDate(d)) } })
           .attr("y", function (d) { return y(d.name) - 10; })
           .attr('stroke', 'grey')
-          .attr("font-weight", 200)
-          .style("font-size", 16)
+          .attr("font-weight", 100)
+          .style("font-size", 15)
           .text(function (d) { return d.name })
           .on("mouseover", function (event, d) {
             d3.select(this).transition()
@@ -420,39 +435,30 @@ function dotColor(data, color) {
   }
 }
 
-function responsivefy(svg) {
+// function responsivefy(svg) {
 
-  // Container is the DOM element, svg is appended.
-  // Then we measure the container and find its
-  // aspect ratio.
-  const container = d3.select(svg.node().parentNode),
-    width = parseInt(svg.style('width'), 10),
-    height = parseInt(svg.style('height'), 10),
-    aspect = width / height;
+//   // Container is the DOM element, svg is appended.
+//   // Then we measure the container and find its
+//   // aspect ratio.
+//   const container = d3.select(svg.node().parentNode),
+//     width = parseInt(svg.style('width'), 10),
+//     height = parseInt(svg.style('height'), 10),
+//     aspect = width / height;
 
-  // Add viewBox attribute to set the value to initial size
-  // add preserveAspectRatio attribute to specify how to scale
-  // and call resize so that svg resizes on page load
-  svg.attr('viewBox', `0 0 ${width} ${height}`).
-    attr('preserveAspectRatio', 'xMinYMid').
-    call(resize);
+//   // Add viewBox attribute to set the value to initial size
+//   // add preserveAspectRatio attribute to specify how to scale
+//   // and call resize so that svg resizes on page load
+//   svg.attr('viewBox', `0 0 ${width} ${height}`).
+//     attr('preserveAspectRatio', 'xMinYMid').
+//     call(resize);
 
-  d3.select(window).on('resize.' + container.attr('id'), resize);
+//   d3.select(window).on('resize.' + container.attr('id'), resize);
 
-  function resize() {
-    const targetWidth = parseInt(container.style('width'));
-    svg.attr('width', targetWidth);
-    svg.attr('height', Math.round(targetWidth / aspect));
-  }
+//   function resize() {
+//     const targetWidth = parseInt(container.style('width'));
+//     svg.attr('width', targetWidth);
+//     svg.attr('height', Math.round(targetWidth / aspect));
+//   }
 
 
-}
-
-// function getTechniques(group) {
-//   let values = []
-//   group.forEach((value) => {
-//     values.push(value)
-//   })
-//   console.log(values)
-//   return values;
 // }
