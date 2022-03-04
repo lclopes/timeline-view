@@ -31,7 +31,7 @@ class Painting:
 
     ## setAuthorName: get author name from CSV entry
     def setAnonymousName(self, authorData):
-        regExAnon = r'(Anonymous, [a-zA-Z ], [0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9](.|,))'
+        regExAnon = r'(Anonymous, [a-zA-Z ]*)'
         anonName = re.search(regExAnon, authorData)
         return anonName.group(0)
 
@@ -55,17 +55,23 @@ class Painting:
 
     ## setAuthorBirthYear: get author activity information (if there are any) from CSV entry
     def setActive(self, authorData):
-        regExActive = r'(active|active approximately) (([0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].|[0-9][0-9][0-9][0-9].)|[1][0-9]th century.)'
+        regExActive = r'(active|active approximately) (([0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].|[0-9][0-9][0-9][0-9].|[0-9][0-9][0-9][0-9]\,)|[1][0-9]th century.)'
         activeDate = re.search(regExActive, authorData)
         if (activeDate == None):
             return "Unknown"
         else:
             if (activeDate.group(0).find("approximately") != -1):
-                return re.split('[.]',activeDate.group(0).split(' ')[2])[0]
+                if (activeDate.group(0).find(",")):
+                    return re.split('[,]',activeDate.group(0).split(' ')[2])[0]
+                else:
+                    return re.split('[.]',activeDate.group(0).split(' ')[2])[0]
             elif (activeDate.group(0).find("century") != -1):
                 return re.split('[.]',activeDate.group(0).split(' ')[1])[0] + " century" 
             else:
-                return re.split('[.]',activeDate.group(0).split(' ')[1])[0]
+                if (activeDate.group(0).find(",")):
+                    return re.split('[,]',activeDate.group(0).split(' ')[1])[0]
+                else:
+                    return re.split('[.]',activeDate.group(0).split(' ')[1])[0]
 
     ## setDetails: get author details (such as attributed to, copy of, etc.) from CSV entry (array value)
     def setDetails(self, authorData):
@@ -128,7 +134,15 @@ def readAndSave(file):
                 p = Painting(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9])
                 a.recordNumber = row[0]
                 if(p.setAuthorName(row[1]) == "Anonymous"):
-                    a.name = p.setAnonymousName(row[1])
+                    if(p.setAuthorBirthYear(row[1]) != 'Unknown' and p.setAuthorDeathYear(row[1]) != 'Unknown'):
+                        a.name = p.setAnonymousName(row[1]) + ', ' + p.setAuthorBirthYear(row[1]) + '-' + p.setAuthorDeathYear(row[1])
+                    elif(p.setAuthorBirthYear(row[1]) == 'Unknown' and p.setAuthorDeathYear(row[1]) != 'Unknown'):
+                        a.name = p.setAnonymousName(row[1]) + ', -' + p.setAuthorDeathYear(row[1])
+                    elif(p.setAuthorBirthYear(row[1]) != 'Unknown' and p.setAuthorDeathYear(row[1]) == 'Unknown'):
+                        a.name = p.setAnonymousName(row[1]) + ', ' + p.setAuthorDeathYear(row[1]) + '-'
+                    elif(p.setActive(row[1]) != 'Unknown'):
+                        a.name = p.setAnonymousName(row[1]) + ', ' + p.setActive(row[1])
+
                 else:
                     a.name = p.setAuthorName(row[1])
                 
@@ -203,4 +217,4 @@ def groupedCsv(file):
     return df.to_csv(index=False)
 
 ## run inside /src folder: python main.py            
-readAndSave("../public/portraits_test.csv")
+readAndSave("../public/American_portraits_metadata.csv")

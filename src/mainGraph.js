@@ -47,7 +47,7 @@ export default class MainGraph {
       var xStart = 1500, xEnd = 2000;
 
       var pageLimit = 20;
-      var dataFilter = data.filter(function (d) { return d.index < pageLimit });
+      var dataFilter = data.filter(function (d) { return d.index <= pageLimit });
       
       var thisPage = 1;
 
@@ -61,44 +61,44 @@ export default class MainGraph {
         .range([0, dataFilter.length])
         .domain(data.map(function (d) { return d.name; }))
 
-      // console.log(data.length);
-      // d3.select("#nextPage").on("click", function() {
-      //   console.log('cliquei')
-      //   d3.selectAll("g > *").remove();
-      //   var viewData = data.slice(pageLimit-2, data.length-1);
-      //   drawGraph(viewData);
-      // })
-
       var viewData = data.slice(pageLimit * thisPage - 1, pageLimit * thisPage);
       
       if(thisPage == 1) d3.select("#prevPage").attr('disabled', true);
 
       if (data.length <= pageLimit) {
         console.log('length < viewData limit');
+        d3.select("#nextPage").attr('disabled', true);
       } else if (data.length > pageLimit) {
         d3.select("#nextPage").on("click", function() {
           console.log('cliquei next')
           thisPage++;
           d3.select("#prevPage").attr('disabled', null);
-          dataFilter = data.filter(function (d) { return d.index < pageLimit * thisPage });
+          dataFilter = data.filter(function (d) { return d.index <= pageLimit * thisPage && d.index > pageLimit * (thisPage-1)});
+          if(dataFilter.length < pageLimit){
+            d3.select("#nextPage").attr('disabled', true);
+          } else {
+            d3.select("#nextPage").attr('disabled', null);
+          }
           console.log(dataFilter);
-          viewData = dataFilter.slice(pageLimit * (thisPage - 1), pageLimit * thisPage);
           d3.selectAll("g > *").remove();
-          drawGraph(viewData);
+          drawGraph(dataFilter);
         })
 
         d3.select("#prevPage").on("click", function() {
           console.log('cliquei prev')
+          thisPage--;
           if(thisPage>1){
-            thisPage--;
-            dataFilter = data.filter(function (d) { return d.index < pageLimit * thisPage });
-            console.log(dataFilter);
-            viewData = dataFilter.slice(pageLimit * (thisPage - 1), pageLimit * thisPage);
+            dataFilter = data.filter(function (d) { return d.index <= pageLimit * thisPage && d.index > pageLimit * (thisPage-1) });
             d3.selectAll("g > *").remove();
-            if(thisPage>1)
-              drawGraph(viewData);
-          }if (thisPage==1){
-            var dataFilter = data.filter(function (d) { return d.index < pageLimit });
+            console.log(dataFilter);
+            drawGraph(dataFilter);
+            if(dataFilter.length > pageLimit){
+              d3.select("#nextPage").attr('disabled', null);
+            }
+          }else if (thisPage==1){
+            var dataFilter = data.filter(function (d) { return d.index <= pageLimit });
+            d3.selectAll("g > *").remove();
+            console.log(dataFilter);
             drawGraph(dataFilter);
             d3.select("#prevPage").attr('disabled', true);
           }
@@ -207,7 +207,7 @@ export default class MainGraph {
         // }
 
         ///////////////////// TODO: COLOR GRADIENT BY NUMBER OF PAINTINGS BY AUTHOR /////////////////////////////////
-        var namesExtent = [1, 12];
+        var namesExtent = [1, 50];
 
         let colorScale = d3.scaleSequential().range(Colors.standardScale()).domain(namesExtent);
         let colorScaleUnknownBirth = d3.scaleSequential().range(Colors.unknownBirthScale()).domain(namesExtent);
@@ -336,8 +336,8 @@ export default class MainGraph {
           .attr("y", function (d) { return y(d.name) - 10; })
           .attr('stroke', 'grey')
           .attr("font-weight", 100)
-          .style("font-size", 15)
-          .text(function (d) { return d.name + ', ' + d.index  })
+          .style("font-size", 18)
+          .text(function (d) { return d.name})
           .on("mouseover", function (event, d) {
             d3.select(this).transition()
               .duration(400).attr('stroke', Colors.authorNameHovered())

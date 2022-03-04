@@ -7,16 +7,20 @@
       <v-row>
         <v-col cols="4" class="d-flex justify-center align-center">
           <div class="pa-2">
-            <h3 class="pb-2">Visualização de Linhas do Tempo</h3>
+            <h3 class="pb-2">Visualização de Linhas do Tempo de Obras de Arte</h3>
             <p>Organizado por data de nascimento e morte do/da artista</p>
             <p><button id="prevPage">Página anterior</button>
-          <button id="nextPage">Próxima página</button></p>
+            <button id="nextPage">Próxima página</button></p>
           </div>
-          Filtrar por técnicas de pintura:
+          <div class="pa-1">
+            Filtrar por técnicas de pintura:
           <select id="selectButton"></select>
-          Escala (início/fim):
+          <!-- Escala (início/fim):
           <input type="number" id="buttonXstart" value="1500" />
-          <input type="number" id="buttonXend" value="2000" />
+          <input type="number" id="buttonXend" value="2000" /> -->
+          </div>
+          
+          
           
           <!-- <button id="">Restaurar zoom</button> -->
         </v-col>
