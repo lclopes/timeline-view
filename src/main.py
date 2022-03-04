@@ -1,5 +1,6 @@
 import csv
 import re
+import pandas as pd
 
 ## PAINTING CLASS ##
 # This class holds the paintings' metadata.
@@ -21,12 +22,18 @@ class Painting:
 
     ## setAuthorName: get author name from CSV entry
     def setAuthorName(self, authorData):
-        regExName = r'([a-zA-Z ]*, [a-zA-Z ]*[a-zA-Z. ]* ?[(a-zA-Z )]*|[a-zA-Z]*)'
+        regExName = r'([a-zA-Z ]*, [a-zA-Z ]*[a-zA-Z. ]* ?[(a-zA-Z )]*|[a-zA-Z]*|)'
         name = re.search(regExName, authorData)
         if (name.group(0).find("Anonymous") != -1):
             return "Anonymous"
         else:
             return name.group(0)
+
+    ## setAuthorName: get author name from CSV entry
+    def setAnonymousName(self, authorData):
+        regExAnon = r'(Anonymous, [a-zA-Z ], [0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9](.|,))'
+        anonName = re.search(regExAnon, authorData)
+        return anonName.group(0)
 
     ## setAuthorBirthYear: get author birth year from CSV entry
     def setAuthorBirthYear(self, authorData):
@@ -82,12 +89,6 @@ class Author:
         self.details = details
         self.technique = technique
         self.medium = medium
- 
-## RECORD CLASS ##
-# This class holds all the paintings.
-class Record:
-    def __init__(self, paintings):
-        self.paintings = paintings
 
 ## TESTING FUNCTIONS ##
 # transforming array a into string separated by commas
@@ -95,51 +96,68 @@ def arrayToString(a):
     return ', '.join(a)
 
 # write object read from csv to new csv
-def writeFile(records,authors):
+def writeFile(paintings,authors):
     with open('exit.csv', mode='w', newline='') as file:
-        fieldnames = ['record_number','name','birth_year','death_year','active_date','details','title','technique','medium',]
+        fieldnames = ['index','record_number','name','birth_year','death_year','active_date','details','title','technique','medium',]
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
 
-        for i in range (len(records.paintings)):
-            writer.writerow({'record_number': authors[i].recordNumber, 'name':authors[i].name, 'birth_year':authors[i].birthYear, 
+        for i in range (len(paintings)):
+            writer.writerow({'index':authors[i].index, 'record_number': authors[i].recordNumber, 'name':authors[i].name, 'birth_year':authors[i].birthYear, 
             'death_year':authors[i].deathYear, 'active_date':authors[i].activeDate,
             'details':('None' if len(authors[i].details) == 0 else arrayToString(authors[i].details) ),
             'title': authors[i].title,
             'technique': authors[i].technique,
             'medium': authors[i].medium})
-
+    
 # read from file and storing in data structures
 # save file in csv
 def readAndSave(file):
-    records = Record(paintings=[])
+    paintings = []
     authors = []
+    
     with open (file, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
+        lines = groupedCsv(file).splitlines()
+        reader = csv.reader(lines)
         line_count = 0
-        painting_count_per_author = 0;
-        prev_author_name = ''
         for row in reader:
             if line_count == 0:
                 line_count += 1
             else:
-                a = Author('','','','', '', '', '', '', '')
+                a = Author('','','','','', '', '', '', '')
                 p = Painting(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9])
                 a.recordNumber = row[0]
                 if(p.setAuthorName(row[1]) == "Anonymous"):
-                    a.name = row[1]
+                    a.name = p.setAnonymousName(row[1])
                 else:
                     a.name = p.setAuthorName(row[1])
+                
+                prev_name = a.name
 
                 if line_count == 1:
-                    prev_author_name = a.name
-                    
-                if a.name == prev_author_name:
-                    painting_count_per_author += 1
+                    # setar variáveis
+                    current_name = a.name
+                    next_name = a.name
+                    index = 1
 
-                elif line_count > 1 and a.name != prev_author_name:
-                    prev_author_name = a.name
-                
+                if line_count > 1 and prev_name != next_name:
+                    # próximo se torna atual
+                    aux = prev_name
+                    prev_name = next_name
+                    next_name = aux
+
+                    # atual se torna anterior
+                    aux = current_name
+                    current_name = prev_name
+                    prev_name = aux
+
+                    index += 1
+
+                print('PROX ' + next_name)
+                print('ATUAL ' + current_name )
+                print('ANTERIOR ' + prev_name+ '\n')
+
+                a.index = index
                 a.birthYear = p.setAuthorBirthYear(row[1])
                 a.deathYear = p.setAuthorDeathYear(row[1])
                 a.activeDate = p.setActive(row[1])
@@ -148,32 +166,41 @@ def readAndSave(file):
                 a.technique = row[3]
                 a.medium = row[5]
             
-                # if(len(authors) > 0 and a.name == prev_author_name):
-                #     # painting_count_per_author += 1
+                # if(len(authors) > 0 and a.name == next_name):
+                #     # index += 1
                 # else:
-                #     painting_count_per_author = 0
-                #     prev_author_name = ''
+                #     index = 0
+                #     next_name = ''
                 
                 if(a.activeDate != 'Unknown' or a.birthYear != 'Unknown' or a.deathYear != 'Unknown'):
-                    records.paintings.append(p)
+                    paintings.append(p)
                     authors.append(a)
                     line_count += 1
 
         ## write to csv
-        writeFile(records,authors)
+        writeFile(paintings,authors)
         ## print all data from Paintings class
-        for i in range (len(records.paintings)):
-            print("AuthorData>>>>> ",records.paintings[i].authorData)
-            print("RECORDNUMBER >>>>", authors[i].recordNumber)
-            print("NAME>>>>> ",authors[i].name)
-            print("BIRTH YEAR>>>>> ",authors[i].birthYear)
-            print("DEATH YEAR>>>>> ",authors[i].deathYear)
-            print("ACTIVE DATE (IF EXISTS)>>>>> ", authors[i].activeDate)
-            print("DETAILS (IF EXISTS)>>>>> ", authors[i].details)
-            print("TECHNIQUE >>>>> ", authors[i].technique)
-            print("MEDIUM >>>>> ", authors[i].medium)
-            print("TITLE >>>>> ", authors[i].title)
-            print('')
+        # for i in range (len(paintings)):
+        #     print("AuthorData>>>>> ",paintings[i].authorData)
+        #     print("RECORDNUMBER >>>>", authors[i].recordNumber)
+        #     print("NAME>>>>> ",authors[i].name)
+        #     print("BIRTH YEAR>>>>> ",authors[i].birthYear)
+        #     print("DEATH YEAR>>>>> ",authors[i].deathYear)
+        #     print("ACTIVE DATE (IF EXISTS)>>>>> ", authors[i].activeDate)
+        #     print("DETAILS (IF EXISTS)>>>>> ", authors[i].details)
+        #     print("TECHNIQUE >>>>> ", authors[i].technique)
+        #     print("MEDIUM >>>>> ", authors[i].medium)
+        #     print("TITLE >>>>> ", authors[i].title)
+        #     print('')
+
+def groupedCsv(file):
+    df = pd.read_csv(file)
+    df.sort_values(["AUTHOR"], 
+                    axis=0,
+                    ascending=[True], 
+                    inplace=True)
+
+    return df.to_csv(index=False)
 
 ## run inside /src folder: python main.py            
 readAndSave("../public/portraits_test.csv")

@@ -12,9 +12,9 @@ export default class MainGraph {
     // set the dimensions and margins of the graph
     var margin = { top: 10, right: 30, bottom: 30, left: 30 },
       width = 1500 - margin.left - margin.right,
-      height = 1600 - margin.top - margin.bottom;
+      height = 800 - margin.top - margin.bottom;
 
-    // append the svg object to the body of the page
+    // append the svg object to the body of the viewData
     var svg = d3.select("#my_dataviz")
       .append('svg')
       .attr("viewBox", [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom])
@@ -46,6 +46,11 @@ export default class MainGraph {
 
       var xStart = 1500, xEnd = 2000;
 
+      var pageLimit = 20;
+      var dataFilter = data.filter(function (d) { return d.index < pageLimit });
+      
+      var thisPage = 1;
+
       // X axis
       var x = d3.scaleLinear()
         .domain([xStart, xEnd])
@@ -53,18 +58,61 @@ export default class MainGraph {
 
       // Y axis
       var y = d3.scaleBand()
-        .range([0, data.length])
+        .range([0, dataFilter.length])
         .domain(data.map(function (d) { return d.name; }))
 
+      // console.log(data.length);
+      // d3.select("#nextPage").on("click", function() {
+      //   console.log('cliquei')
+      //   d3.selectAll("g > *").remove();
+      //   var viewData = data.slice(pageLimit-2, data.length-1);
+      //   drawGraph(viewData);
+      // })
+
+      var viewData = data.slice(pageLimit * thisPage - 1, pageLimit * thisPage);
+      
+      if(thisPage == 1) d3.select("#prevPage").attr('disabled', true);
+
+      if (data.length <= pageLimit) {
+        console.log('length < viewData limit');
+      } else if (data.length > pageLimit) {
+        d3.select("#nextPage").on("click", function() {
+          console.log('cliquei next')
+          thisPage++;
+          d3.select("#prevPage").attr('disabled', null);
+          dataFilter = data.filter(function (d) { return d.index < pageLimit * thisPage });
+          console.log(dataFilter);
+          viewData = dataFilter.slice(pageLimit * (thisPage - 1), pageLimit * thisPage);
+          d3.selectAll("g > *").remove();
+          drawGraph(viewData);
+        })
+
+        d3.select("#prevPage").on("click", function() {
+          console.log('cliquei prev')
+          if(thisPage>1){
+            thisPage--;
+            dataFilter = data.filter(function (d) { return d.index < pageLimit * thisPage });
+            console.log(dataFilter);
+            viewData = dataFilter.slice(pageLimit * (thisPage - 1), pageLimit * thisPage);
+            d3.selectAll("g > *").remove();
+            if(thisPage>1)
+              drawGraph(viewData);
+          }if (thisPage==1){
+            var dataFilter = data.filter(function (d) { return d.index < pageLimit });
+            drawGraph(dataFilter);
+            d3.select("#prevPage").attr('disabled', true);
+          }
+        })
+      }
 
       // create chart
-      drawGraph(data);
-
+      drawGraph(dataFilter);
+      
       // redraw chart
       function updateTechnique(selectedGroup) {
 
         // Create new data with the selection?
-        var dataFilter = data.filter(function (d) { return d.technique == selectedGroup })
+        var dataFilter = viewData.filter(function (d) { return d.technique == selectedGroup })
 
         // Remove previous data
         d3.selectAll("g > *").remove();
@@ -72,13 +120,14 @@ export default class MainGraph {
         // Give these new data to update line
         if (selectedGroup == 'Todos') {
           // add new data
-          drawGraph(data);
+          drawGraph(viewData);
         } else {
           // add new data
           drawGraph(dataFilter);
         }
 
       }
+
 
       // When the button is changed, run the updateChart function
       d3.select("#selectButton").on("change", function () {
@@ -139,10 +188,10 @@ export default class MainGraph {
 
         // Y axis
         y = d3.scaleBand()
-          .range([50, height])
+          .range([50, 700])
           .domain(data.map(function (d) { return d.name; }))
-          .paddingOuter(0.2)
-          .align(0)
+          .paddingInner(0)
+          .align(1)
 
         // svg.append("g")
         //   .call(d3.axisLeft(y))
@@ -288,7 +337,7 @@ export default class MainGraph {
           .attr('stroke', 'grey')
           .attr("font-weight", 100)
           .style("font-size", 15)
-          .text(function (d) { return d.name })
+          .text(function (d) { return d.name + ', ' + d.index  })
           .on("mouseover", function (event, d) {
             d3.select(this).transition()
               .duration(400).attr('stroke', Colors.authorNameHovered())
@@ -447,7 +496,7 @@ function dotColor(data, color) {
 
 //   // Add viewBox attribute to set the value to initial size
 //   // add preserveAspectRatio attribute to specify how to scale
-//   // and call resize so that svg resizes on page load
+//   // and call resize so that svg resizes on viewData load
 //   svg.attr('viewBox', `0 0 ${width} ${height}`).
 //     attr('preserveAspectRatio', 'xMinYMid').
 //     call(resize);
