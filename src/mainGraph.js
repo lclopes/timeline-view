@@ -48,7 +48,7 @@ export default class MainGraph {
 
       var pageLimit = 20;
       var dataFilter = data.filter(function (d) { return d.index <= pageLimit });
-      
+      // var dataFiltered = []
       var thisPage = 1;
 
       // X axis
@@ -61,7 +61,7 @@ export default class MainGraph {
         .range([0, dataFilter.length])
         .domain(data.map(function (d) { return d.name; }))
 
-      var viewData = data.slice(pageLimit * thisPage - 1, pageLimit * thisPage);
+      // var viewData = data.slice(pageLimit * thisPage - 1, pageLimit * thisPage);
       
       if(thisPage == 1) d3.select("#prevPage").attr('disabled', true);
 
@@ -112,18 +112,19 @@ export default class MainGraph {
       function updateTechnique(selectedGroup) {
 
         // Create new data with the selection?
-        var dataFilter = viewData.filter(function (d) { return d.technique == selectedGroup })
+        var techniqueFilter = dataFilter.filter(function (d) { return d.technique == selectedGroup })
 
         // Remove previous data
         d3.selectAll("g > *").remove();
 
         // Give these new data to update line
         if (selectedGroup == 'Todos') {
-          // add new data
-          drawGraph(viewData);
-        } else {
+          // thisPage = 1;
           // add new data
           drawGraph(dataFilter);
+        } else {
+          // add new data
+          drawGraph(techniqueFilter);
         }
 
       }

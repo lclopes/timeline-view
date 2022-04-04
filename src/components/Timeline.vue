@@ -13,7 +13,7 @@
             <button id="nextPage">Próxima página</button></p>
           </div>
           <div class="pa-1">
-            Filtrar por técnicas de pintura:
+            Filtrar por técnicas de pintura (filtro funcionando apenas para as entradas da página):
           <select id="selectButton"></select>
           <!-- Escala (início/fim):
           <input type="number" id="buttonXstart" value="1500" />
