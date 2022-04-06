@@ -36,23 +36,26 @@ export default class MainGraph {
       
       console.log("data.length ==>> "+data.length);
 
+      /// LÓGICA QUE VAI INUTILIZAR O INDEX (SE TUDO DER CERTOO)
+
       let testLength = 0;
       let uniqueDataLength = 1;
-      let hasChangedName = true;
-      console.log(hasChangedName);
       for (let i = 0; i < data.length + 1; i++) {
         let thisName = data[i].name;
         let nextName = data[i+1].name;
 
-        if(thisName == nextName) {
-          hasChangedName = true;
-        } else {
-          hasChangedName = false;
+        if(thisName != nextName) {
           uniqueDataLength++;
         }
         testLength++
         if(uniqueDataLength == 20) break;
       }
+
+      //TO DO: realizar Slice entre 0 e o valor de testLength
+      //que é o número de linhas contendo 20 autores diferentes
+      
+      //Para os próximos: trocar o uniqueDataLength = 20 pelo 
+      //tamanho da página
 
       console.log('DATA -> ' + testLength);
       // set of techniques
