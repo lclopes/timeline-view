@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+
 import Colors from "./colors.js"
 
 export default class MainGraph {
@@ -10,12 +11,12 @@ export default class MainGraph {
 
   createGraph() {
     // set the dimensions and margins of the graph
-    var margin = { top: 10, right: 30, bottom: 30, left: 30 },
+    let margin = { top: 10, right: 30, bottom: 30, left: 30 },
       width = 1500 - margin.left - margin.right,
       height = 800 - margin.top - margin.bottom;
 
     // append the svg object to the body of the viewData
-    var svg = d3.select("#my_dataviz")
+    let svg = d3.select("#my_dataviz")
       .append('svg')
       .attr("viewBox", [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom])
       // .attr('width', width + margin.left + margin.right)
@@ -25,11 +26,35 @@ export default class MainGraph {
       .append("g")
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    var xAxis = d3.select("#my_dataviz")
+    let xAxis = d3.select("#my_dataviz")
       .append("g");
 
+    let line_count = 0;
+
     // asynchronous function to draw graph based on csv
-    this.data.then(function (data) {
+    this.data.then(function (data) { 
+      
+      console.log("data.length ==>> "+data.length);
+
+      let testLength = 0;
+      let uniqueDataLength = 1;
+      let hasChangedName = true;
+      console.log(hasChangedName);
+      for (let i = 0; i < data.length + 1; i++) {
+        let thisName = data[i].name;
+        let nextName = data[i+1].name;
+
+        if(thisName == nextName) {
+          hasChangedName = true;
+        } else {
+          hasChangedName = false;
+          uniqueDataLength++;
+        }
+        testLength++
+        if(uniqueDataLength == 20) break;
+      }
+
+      console.log('DATA -> ' + testLength);
       // set of techniques
       const allGroup = new Set(data.map(d => d.technique));
       allGroup.add('Todos');
@@ -44,24 +69,24 @@ export default class MainGraph {
         .text(function (d) { return d; }) // text showed in the menu
         .attr("value", function (d) { return d; }) // corresponding value returned by the button
 
-      var xStart = 1500, xEnd = 2000;
+      let xStart = 1500, xEnd = 2000;
 
-      var pageLimit = 20;
-      var dataFilter = data.filter(function (d) { return d.index <= pageLimit });
-      // var dataFiltered = []
-      var thisPage = 1;
+      let pageLimit = 20;
+      let dataFilter = data.filter(function (d) { return d.index <= pageLimit });
+      // let dataFiltered = []
+      let thisPage = 1;
 
       // X axis
-      var x = d3.scaleLinear()
+      let x = d3.scaleLinear()
         .domain([xStart, xEnd])
         .range([0, width]);
 
       // Y axis
-      var y = d3.scaleBand()
+      let y = d3.scaleBand()
         .range([0, dataFilter.length])
         .domain(data.map(function (d) { return d.name; }))
 
-      // var viewData = data.slice(pageLimit * thisPage - 1, pageLimit * thisPage);
+      // let viewData = data.slice(pageLimit * thisPage - 1, pageLimit * thisPage);
       
       if(thisPage == 1) d3.select("#prevPage").attr('disabled', true);
 
@@ -96,7 +121,7 @@ export default class MainGraph {
               d3.select("#nextPage").attr('disabled', null);
             }
           }else if (thisPage==1){
-            var dataFilter = data.filter(function (d) { return d.index <= pageLimit });
+            let dataFilter = data.filter(function (d) { return d.index <= pageLimit });
             d3.selectAll("g > *").remove();
             console.log(dataFilter);
             drawGraph(dataFilter);
@@ -112,7 +137,7 @@ export default class MainGraph {
       function updateTechnique(selectedGroup) {
 
         // Create new data with the selection?
-        var techniqueFilter = dataFilter.filter(function (d) { return d.technique == selectedGroup })
+        let techniqueFilter = dataFilter.filter(function (d) { return d.technique == selectedGroup })
 
         // Remove previous data
         d3.selectAll("g > *").remove();
@@ -133,7 +158,7 @@ export default class MainGraph {
       // When the button is changed, run the updateChart function
       d3.select("#selectButton").on("change", function () {
         // recover the option that has been chosen
-        var selectedOption = d3.select(this).property("value")
+        let selectedOption = d3.select(this).property("value")
         // run the updateChart function with this selected option
         updateTechnique(selectedOption)
       })
@@ -180,7 +205,7 @@ export default class MainGraph {
       // function to create chart /////////////////////////////// main code here //////////////////////////////
       function drawGraph(data) {
         // X axis
-        var x = d3.scaleLinear()
+        let x = d3.scaleLinear()
           .domain([xStart, xEnd])
           .range([0, width]);
 
@@ -208,23 +233,23 @@ export default class MainGraph {
         // }
 
         ///////////////////// TODO: COLOR GRADIENT BY NUMBER OF PAINTINGS BY AUTHOR /////////////////////////////////
-        var namesExtent = [1, 50];
+        let namesExtent = [1, 50];
 
         let colorScale = d3.scaleSequential().range(Colors.standardScale()).domain(namesExtent);
         let colorScaleUnknownBirth = d3.scaleSequential().range(Colors.unknownBirthScale()).domain(namesExtent);
         let colorScaleUnknownDeath = d3.scaleSequential().range(Colors.unknownDeathScale()).domain(namesExtent);
 
-        // var group = d3.group(data, d => d.name, d => d.technique);
-        // // var valuesGroup = group.values();
+        // let group = d3.group(data, d => d.name, d => d.technique);
+        // // let valuesGroup = group.values();
 
         // console.log(group.get("Folwell, Samuel").keys());
         // console.log(d3.extent(group.get(data, d => d.name)))
-        // var rangeNames = d3.rollup(data, v => v.length, d => d.name);
+        // let rangeNames = d3.rollup(data, v => v.length, d => d.name);
         // let lineColor = d3.scaleOrdinal().domain(rangeNames.values).range(["grey","black"])
         // console.log(lineColor)
 
         // Tooltips
-        var tooltip = d3.select("body").append("div")
+        let tooltip = d3.select("body").append("div")
           .style("opacity", 0)
           .style("position", "absolute")
           .style("text-align", "center")
@@ -239,7 +264,7 @@ export default class MainGraph {
           .style("border-radius", "8px")
           .style("border-color", "black");
 
-        var authorInfo = d3.select("body").append("div")
+        let authorInfo = d3.select("body").append("div")
           .style("opacity", 0)
           .style("position", "absolute")
           .style("text-align", "center")
@@ -254,9 +279,9 @@ export default class MainGraph {
           .style("border-radius", "8px")
           .style("border-color", "black");
 
-        var authors = [...new Set(data.map(d => d.name))];
+        let authors = [...new Set(data.map(d => d.name))];
 
-        var uniqueAuthors = authors.map(function (d) {
+        let uniqueAuthors = authors.map(function (d) {
           return data.find(function (e) {
             return e.name === d
           })
@@ -367,7 +392,7 @@ export default class MainGraph {
               .style("opacity", 0);
           });
 
-        // Circles of variable 1
+        // Circles of letiable 1
         svg.selectAll("mycircle")
           .data(uniqueAuthors)
           .enter()
@@ -383,7 +408,7 @@ export default class MainGraph {
             mouseout(this, tooltip)
           });
 
-        // Circles of variable 2
+        // Circles of letiable 2
         svg.selectAll("mycircle")
           .data(uniqueAuthors)
           .enter()
@@ -403,6 +428,8 @@ export default class MainGraph {
       }
 
     })
+
+    console.log("LINE COUNT => "+line_count);
   }
 }
 // auxiliary functions
@@ -484,6 +511,32 @@ function dotColor(data, color) {
     return "#FFF"
   }
 }
+
+// function createIndex(d, lineCount) {
+//   let prevName = d.name;
+//   let currentName = '';
+//   let nextName = '';
+//   let index = 0;
+//   let aux = '';
+
+//   if (lineCount == 1) {
+//     currentName = d.name;
+//     nextName = d.name;
+//     index = 1;
+//   } else if (lineCount > 1 && prevName != nextName) {
+//     aux = prevName;
+//     prevName = nextName;
+//     nextName = aux;
+  
+//     aux = currentName;
+//     currentName = prevName;
+//     prevName = aux;
+
+//     d.set('newIndex',index);
+//     index++;
+//   }
+//   return d;
+// }
 
 // function responsivefy(svg) {
 
