@@ -106,12 +106,12 @@ def arrayToString(a):
 # write object read from csv to new csv
 def writeFile(paintings,authors):
     with open('exit.csv', mode='w', newline='', encoding='utf-8') as file:
-        fieldnames = ['index','record_number','name','birth_year','death_year','active_date','details','title','technique','medium',]
+        fieldnames = ['record_number','name','birth_year','death_year','active_date','details','title','technique','medium',]
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
 
         for i in range (len(paintings)):
-            writer.writerow({'index':authors[i].index, 'record_number': authors[i].recordNumber, 'name':authors[i].name, 'birth_year':authors[i].birthYear, 
+            writer.writerow({'record_number': authors[i].recordNumber, 'name':authors[i].name, 'birth_year':authors[i].birthYear, 
             'death_year':authors[i].deathYear, 'active_date':authors[i].activeDate,
             'details':('None' if len(authors[i].details) == 0 else arrayToString(authors[i].details) ),
             'title': authors[i].title,
@@ -132,7 +132,7 @@ def readAndSave(file):
             if line_count == 0:
                 line_count += 1
             else:
-                a = Author('','','','','', '', '', '', '')
+                a = Author('','','','','','','','','')
                 p = Painting(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9])
                 a.recordNumber = row[0]
                 if(p.setAuthorName(row[1]) == "Anonymous"):
@@ -148,32 +148,32 @@ def readAndSave(file):
                 else:
                     a.name = p.setAuthorName(row[1])
                 
-                prev_name = a.name
+                # prev_name = a.name
 
-                if line_count == 1:
-                    # setar variáveis
-                    current_name = a.name
-                    next_name = a.name
-                    index = 1
+                # if line_count == 1:
+                #     # setar variáveis
+                #     current_name = a.name
+                #     next_name = a.name
+                #     index = 1
 
-                if line_count > 1 and prev_name != next_name:
-                    # próximo se torna atual
-                    aux = prev_name
-                    prev_name = next_name
-                    next_name = aux
+                # if line_count > 1 and prev_name != next_name:
+                #     # próximo se torna atual
+                #     aux = prev_name
+                #     prev_name = next_name
+                #     next_name = aux
 
-                    # atual se torna anterior
-                    aux = current_name
-                    current_name = prev_name
-                    prev_name = aux
+                #     # atual se torna anterior
+                #     aux = current_name
+                #     current_name = prev_name
+                #     prev_name = aux
 
-                    index += 1
+                #     index += 1
 
-                print('PROX ' + next_name)
-                print('ATUAL ' + current_name )
-                print('ANTERIOR ' + prev_name+ '\n')
+                # print('PROX ' + next_name)
+                # print('ATUAL ' + current_name )
+                # print('ANTERIOR ' + prev_name+ '\n')
 
-                a.index = index
+                # # a.index = index
                 a.birthYear = p.setAuthorBirthYear(row[1])
                 a.deathYear = p.setAuthorDeathYear(row[1])
                 a.activeDate = p.setActive(row[1])
@@ -186,6 +186,8 @@ def readAndSave(file):
                     paintings.append(p)
                     authors.append(a)
                     line_count += 1
+
+                print('Added ' + a.name)
 
         ## write to csv
         writeFile(paintings,authors)

@@ -32,32 +32,14 @@ export default class MainGraph {
     let line_count = 0;
 
     // asynchronous function to draw graph based on csv
-    this.data.then(function (data) { 
-      
-      console.log("data.length ==>> "+data.length);
-
-      /// LÓGICA QUE VAI INUTILIZAR O INDEX (SE TUDO DER CERTOO)
-
-      let testLength = 0;
-      let uniqueDataLength = 1;
-      for (let i = 0; i < data.length + 1; i++) {
-        let thisName = data[i].name;
-        let nextName = data[i+1].name;
-
-        if(thisName != nextName) {
-          uniqueDataLength++;
-        }
-        testLength++
-        if(uniqueDataLength == 20) break;
-      }
+    this.data.then(function (data) {
 
       //TO DO: realizar Slice entre 0 e o valor de testLength
       //que é o número de linhas contendo 20 autores diferentes
-      
+
       //Para os próximos: trocar o uniqueDataLength = 20 pelo 
       //tamanho da página
 
-      console.log('DATA -> ' + testLength);
       // set of techniques
       const allGroup = new Set(data.map(d => d.technique));
       allGroup.add('Todos');
@@ -75,10 +57,11 @@ export default class MainGraph {
       let xStart = 1500, xEnd = 2000;
 
       let pageLimit = 20;
-      let dataFilter = data.filter(function (d) { return d.index <= pageLimit });
+      // let dataFilter = data.filter(function (d) { return d.index <= pageLimit });
       // let dataFiltered = []
       let thisPage = 1;
-
+      let dataFilter = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage -1), 
+      getUniqueAuthorLength(data, pageLimit, thisPage));
       // X axis
       let x = d3.scaleLinear()
         .domain([xStart, xEnd])
@@ -89,20 +72,26 @@ export default class MainGraph {
         .range([0, dataFilter.length])
         .domain(data.map(function (d) { return d.name; }))
 
-      // let viewData = data.slice(pageLimit * thisPage - 1, pageLimit * thisPage);
-      
-      if(thisPage == 1) d3.select("#prevPage").attr('disabled', true);
+      if (thisPage == 1) d3.select("#prevPage").attr('disabled', true);
 
+      // prev/next button logic
       if (data.length <= pageLimit) {
         console.log('length < viewData limit');
         d3.select("#nextPage").attr('disabled', true);
       } else if (data.length > pageLimit) {
-        d3.select("#nextPage").on("click", function() {
+        d3.select("#nextPage").on("click", function () {
           console.log('cliquei next')
           thisPage++;
+          console.log('pagina ' + thisPage);
           d3.select("#prevPage").attr('disabled', null);
-          dataFilter = data.filter(function (d) { return d.index <= pageLimit * thisPage && d.index > pageLimit * (thisPage-1)});
-          if(dataFilter.length < pageLimit){
+          // dataFilter = data.filter(function (d) { return d.index <= pageLimit * thisPage && d.index > pageLimit * (thisPage - 1) });
+          dataFilter = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage -1), 
+          getUniqueAuthorLength(data, pageLimit, thisPage));
+
+          console.log(getUniqueAuthorLength(data, pageLimit, thisPage-1 ) + ', ' +
+                                getUniqueAuthorLength(data, pageLimit, thisPage))
+
+          if (dataFilter.length < pageLimit) {
             d3.select("#nextPage").attr('disabled', true);
           } else {
             d3.select("#nextPage").attr('disabled', null);
@@ -112,30 +101,51 @@ export default class MainGraph {
           drawGraph(dataFilter);
         })
 
-        d3.select("#prevPage").on("click", function() {
+        d3.select("#prevPage").on("click", function () {
           console.log('cliquei prev')
           thisPage--;
-          if(thisPage>1){
-            dataFilter = data.filter(function (d) { return d.index <= pageLimit * thisPage && d.index > pageLimit * (thisPage-1) });
+          console.log('pagina ' + thisPage);
+          if (thisPage > 1) {
+            // dataFilter = data.filter(function (d) { return d.index <= pageLimit * thisPage && d.index > pageLimit * (thisPage - 1) });
+            dataFilter = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage -1), 
+          getUniqueAuthorLength(data, pageLimit, thisPage));
+
+          console.log(getUniqueAuthorLength(data, pageLimit, thisPage-1 ) + ', ' +
+                                getUniqueAuthorLength(data, pageLimit, thisPage))
+
             d3.selectAll("g > *").remove();
             console.log(dataFilter);
             drawGraph(dataFilter);
-            if(dataFilter.length > pageLimit){
+            if (dataFilter.length > pageLimit) {
               d3.select("#nextPage").attr('disabled', null);
             }
-          }else if (thisPage==1){
-            let dataFilter = data.filter(function (d) { return d.index <= pageLimit });
+          } else if (thisPage == 1) {
+            // let dataFilter = data.filter(function (d) { return d.index <= pageLimit });
+            let dataFilter = data.slice(0, getUniqueAuthorLength(data, pageLimit, thisPage));
+
+            console.log(getUniqueAuthorLength(data, pageLimit, thisPage-1 ) + ', ' +
+                                getUniqueAuthorLength(data, pageLimit, thisPage))
+
+                                
             d3.selectAll("g > *").remove();
             console.log(dataFilter);
             drawGraph(dataFilter);
             d3.select("#prevPage").attr('disabled', true);
           }
         })
+
+        //technique filter
+        d3.select("#selectButton").on("change", function () {
+          // recover the option that has been chosen
+          let selectedOption = d3.select(this).property("value")
+          // run the updateChart function with this selected option
+          updateTechnique(selectedOption)
+        })
       }
 
       // create chart
       drawGraph(dataFilter);
-      
+
       // redraw chart
       function updateTechnique(selectedGroup) {
 
@@ -156,7 +166,6 @@ export default class MainGraph {
         }
 
       }
-
 
       // When the button is changed, run the updateChart function
       d3.select("#selectButton").on("change", function () {
@@ -366,7 +375,7 @@ export default class MainGraph {
           .attr('stroke', 'grey')
           .attr("font-weight", 100)
           .style("font-size", 18)
-          .text(function (d) { return d.name})
+          .text(function (d) { return d.name })
           .on("mouseover", function (event, d) {
             d3.select(this).transition()
               .duration(400).attr('stroke', Colors.authorNameHovered())
@@ -432,7 +441,7 @@ export default class MainGraph {
 
     })
 
-    console.log("LINE COUNT => "+line_count);
+    console.log("LINE COUNT => " + line_count);
   }
 }
 // auxiliary functions
@@ -515,56 +524,33 @@ function dotColor(data, color) {
   }
 }
 
-// function createIndex(d, lineCount) {
-//   let prevName = d.name;
-//   let currentName = '';
-//   let nextName = '';
-//   let index = 0;
-//   let aux = '';
+function getUniqueAuthorLength(data, pageLimit, page) {
+  /// LÓGICA QUE VAI INUTILIZAR O INDEX (SE TUDO DER CERTOO)
+  //number of lines with author number limited by pageLimit
+  let totalLength = 0;
+  //data size while reading
+  let dataLength = 0;
 
-//   if (lineCount == 1) {
-//     currentName = d.name;
-//     nextName = d.name;
-//     index = 1;
-//   } else if (lineCount > 1 && prevName != nextName) {
-//     aux = prevName;
-//     prevName = nextName;
-//     nextName = aux;
+  // CRITÉRIO DE PARADA
+  if (page == 0) return 0;
   
-//     aux = currentName;
-//     currentName = prevName;
-//     prevName = aux;
+  else{
+    // Recursively get the starting point of the loop
+    let start = getUniqueAuthorLength(data, pageLimit, page-1)
+    // Loop:
+    for (let i = start; i < data.length; i++) {
+        let thisName = data[i].name;
+        let nextName = data[i + 1].name;
 
-//     d.set('newIndex',index);
-//     index++;
-//   }
-//   return d;
-// }
-
-// function responsivefy(svg) {
-
-//   // Container is the DOM element, svg is appended.
-//   // Then we measure the container and find its
-//   // aspect ratio.
-//   const container = d3.select(svg.node().parentNode),
-//     width = parseInt(svg.style('width'), 10),
-//     height = parseInt(svg.style('height'), 10),
-//     aspect = width / height;
-
-//   // Add viewBox attribute to set the value to initial size
-//   // add preserveAspectRatio attribute to specify how to scale
-//   // and call resize so that svg resizes on viewData load
-//   svg.attr('viewBox', `0 0 ${width} ${height}`).
-//     attr('preserveAspectRatio', 'xMinYMid').
-//     call(resize);
-
-//   d3.select(window).on('resize.' + container.attr('id'), resize);
-
-//   function resize() {
-//     const targetWidth = parseInt(container.style('width'));
-//     svg.attr('width', targetWidth);
-//     svg.attr('height', Math.round(targetWidth / aspect));
-//   }
-
-
-// }
+        // check if next name is different
+        if (thisName != nextName) {
+          // this holds the limit of the page
+          dataLength++;
+        }
+        //add to total length 
+        totalLength++
+        if (dataLength == pageLimit || totalLength+start >= data.length - pageLimit) break;
+      }
+    return totalLength+start;
+  }
+}
