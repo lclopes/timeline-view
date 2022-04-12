@@ -22,7 +22,7 @@ class Painting:
 
     ## setAuthorName: get author name from CSV entry
     def setAuthorName(self, authorData):
-        regExName = r'([[A-zÀ-ú ]*, [[A-zÀ-ú ]*[[A-zÀ-ú. ]* ?[([A-zÀ-ú )]*|[[A-zÀ-ú]*|[[A-zÀ-ú]*\,)'
+        regExName = r'([[A-zÀ-ú\- ]*, [[A-zÀ-ú\- ]*[[A-zÀ-ú.\- ]* ?[([A-zÀ-ú\- )]*|[[A-zÀ-ú\-]*|[[A-zÀ-ú\-]*\,)'
         name = re.search(regExName, authorData)
         if (name.group(0).find("Anonymous") != -1):
             return "Anonymous"
@@ -43,6 +43,8 @@ class Painting:
         birthYear = re.search(regExBirthYear, authorData)
         if (birthYear == None):
             return "Unknown"
+        elif (birthYear.group(0).find("active") != -1):
+            return "Unknown"
         else:
             return re.split('[?]',birthYear.group(0).split('-')[0])[0]
 
@@ -57,7 +59,7 @@ class Painting:
 
     ## setAuthorBirthYear: get author activity information (if there are any) from CSV entry
     def setActive(self, authorData):
-        regExActive = r'(active|active approximately) (([0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].|[0-9][0-9][0-9][0-9].|[0-9][0-9][0-9][0-9]\,)|[1][0-9]th century.)'
+        regExActive = r'(active? approximately?) (([0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].|[0-9][0-9][0-9][0-9].|[0-9][0-9][0-9][0-9]\,)|[1][0-9]th century.)'
         activeDate = re.search(regExActive, authorData)
         if (activeDate == None):
             return "Unknown"
@@ -77,7 +79,7 @@ class Painting:
 
     ## setDetails: get author details (such as attributed to, copy of, etc.) from CSV entry (array value)
     def setDetails(self, authorData):
-        regExDet = r'(attributed to|copy of|school of|contributor)'
+        regExDet = r'(attributed to|copy of|school of|contributor|approximately|active)'
         details = re.findall(regExDet, authorData)
         if (details == None):
             return "Unknown"
@@ -180,7 +182,10 @@ def readAndSave(file):
                 a.details = p.setDetails(row[1])
                 a.title = row[2]
                 a.technique = row[3]
-                a.medium = row[5]
+                if row[5] == '':
+                    a.medium = 'None'
+                else:
+                    a.medium = row[5]
                 
                 if(a.activeDate != 'Unknown' or a.birthYear != 'Unknown' or a.deathYear != 'Unknown'):
                     paintings.append(p)
