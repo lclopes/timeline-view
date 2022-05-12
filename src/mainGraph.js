@@ -32,19 +32,38 @@ export default class MainGraph {
 
     // asynchronous function to draw graph based on csv
     this.data.then(function (data) {
+      
       // set of techniques
-      const allGroup = new Set(data.map(d => d.technique));
-      allGroup.add('Todos');
+      const allTechniqueGroup = new Set(data.map(d => d.technique.trim()));
+      allTechniqueGroup.add('Todos');
+      
+      horizontalGradientLegend("#colorLegend1","#ffe0ff","#0000ff");
+      horizontalGradientLegend("#colorLegend2","#ffb7ce","#de425b");
+      horizontalGradientLegend("#colorLegend3","#b8d0e6","#0692cf");
 
       // create dropdown menu of techniques
-      d3.select("#selectButton")
+      d3.select("#selectTechnique")
         .selectAll('myOptions')
-        .data(allGroup)
+        .data(allTechniqueGroup)
         .enter()
         .append('option')
         .property("selected", "Todos")
         .text(function (d) { return d; }) // text showed in the menu
         .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+      const allMediumGroup = new Set(data.map(d => d.medium.trim()));
+      allMediumGroup.add('Todos');
+
+      // create dropdown menu of techniques
+      d3.select("#selectMedium")
+        .selectAll('myOptions')
+        .data(allMediumGroup)
+        .enter()
+        .append('option')
+        .property("selected", "Todos")
+        .text(function (d) { return d; }) // text showed in the menu
+        .attr("value", function (d) { return d; }) // corresponding value returned by the button
+        .attr("width", "60px")
 
       // year scale
       let xStart = 1500, xEnd = 2000;
@@ -54,19 +73,43 @@ export default class MainGraph {
 
       // starting page
       let thisPage = 1;
+      document.getElementById("thisPage").innerHTML = thisPage;
 
+      document.getElementById("selectedFilter").innerHTML = "Todos";
+      
+      //data size while reading
+      // let uniqueAuthorsSize = 0;
+      
       //technique filter
       
       // getting first 20 unique authors
       let dataSliced = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage -1), 
       getUniqueAuthorLength(data, pageLimit, thisPage));
 
-      d3.select("#selectButton").on("change", function () {
+      d3.select("#selectTechnique").on("change", function () {
         // recover the option that has been chosen
         let selectedOption = d3.select(this).property("value")
+        if(selectedOption == "Todos") {
+          document.getElementById("selectedFilter").innerHTML = "Todos";
+        } else {
+          document.getElementById("selectedFilter").innerHTML = "Técnica: "+ selectedOption ;
+        }
         // run the updateChart function with this selected option
         thisPage = 1;
         dataSliced = updateTechnique(selectedOption)
+      })
+
+      d3.select("#selectMedium").on("change", function () {
+        // recover the option that has been chosen
+        let selectedOption = d3.select(this).property("value")
+        if(selectedOption == "Todos") {
+          document.getElementById("selectedFilter").innerHTML = "Todos";
+        } else {
+          document.getElementById("selectedFilter").innerHTML = "Meio: "+ selectedOption ;
+        }
+        // run the updateChart function with this selected option
+        thisPage = 1;
+        dataSliced = updateMedium(selectedOption)
       })
 
       // getting unique authors number
@@ -77,6 +120,14 @@ export default class MainGraph {
         })
       })
       
+      let uniqueAuthorsSize = uniqueAuthors.length;
+      
+      let maxPage = uniqueAuthorsSize / pageLimit;
+      let lastPageLimit = uniqueAuthorsSize % pageLimit;
+      let isLastPage = false;
+
+      console.log(uniqueAuthorsSize + ' / ' + pageLimit + ' = ' + Math.ceil(maxPage));
+
       // setting X axis
       let x = d3.scaleLinear()
         .domain([xStart, xEnd])
@@ -126,12 +177,35 @@ export default class MainGraph {
         return techniqueFiltered;
       }
 
+      function updateMedium(selectedGroup) {
+        let mediumFiltered;
+        if (selectedGroup == 'Todos') {
+          mediumFiltered = data;
+        } else {
+          // Create new data with the selection?
+          mediumFiltered = data.filter(function (d) { return d.medium == selectedGroup })
+        }
+        let mediumFilteredSliced = mediumFiltered.slice(getUniqueAuthorLength(mediumFiltered, pageLimit, thisPage -1), 
+        getUniqueAuthorLength(mediumFiltered, pageLimit, thisPage));
+
+        console.log(mediumFiltered);
+
+        // Remove previous data
+        d3.selectAll("g > *").remove();
+
+        // paginate
+        paginate(mediumFilteredSliced, mediumFiltered, pageLimit, thisPage);
+
+        // create chart
+        drawGraph(mediumFilteredSliced);
+        
+        return mediumFilteredSliced;
+      }
       
       //// ATENÇÃO: PAGINAÇÃO DANDO PROBLEMA NA ÚLTIMA PÁGINA
       // datasliced não reflete tamanho real da página
       // prev/next button logic
       function paginate(dataSliced, data, pageLimit, thisPage) {
-        
         console.log(dataSliced);
         if (dataSliced.length <= pageLimit && thisPage == 1) {
           console.log('length < viewData limit');
@@ -140,26 +214,25 @@ export default class MainGraph {
           dataSliced = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage), 
               data.length);
               console.log(dataSliced);
-              d3.selectAll("g > *").remove();
-              drawGraph(dataSliced);
           
         } else if (dataSliced.length > pageLimit) {
           d3.select("#nextPage").attr('disabled', null);
           d3.select("#nextPage").on("click", function () {
             console.log('cliquei next')
             thisPage++;
+            document.getElementById("thisPage").innerHTML = thisPage;
             console.log('pagina ' + thisPage);
             d3.select("#prevPage").attr('disabled', null);
             dataSliced = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage -1), 
             getUniqueAuthorLength(data, pageLimit, thisPage));
 
-            console.log(getUniqueAuthorLength(data, pageLimit, thisPage-1 ) + ', ' +
+            console.log(getUniqueAuthorLength(data, pageLimit, thisPage-1) + ', ' +
                                   getUniqueAuthorLength(data, pageLimit, thisPage))
 
-            if (dataSliced.length <= pageLimit) {
-              console.log('here');
+            if (isLastPage) {
+              console.log('last page');
               d3.select("#nextPage").attr('disabled', true);
-              dataSliced = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage), 
+              dataSliced = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage-1), 
               data.length);
               console.log(dataSliced);
               d3.selectAll("g > *").remove();
@@ -175,12 +248,13 @@ export default class MainGraph {
           d3.select("#prevPage").on("click", function () {
             console.log('cliquei prev')
             thisPage--;
+            document.getElementById("thisPage").innerHTML = thisPage;
             console.log('pagina ' + thisPage);
             if (thisPage > 1) {
-              dataSliced = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage -1), 
+              dataSliced = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage-1), 
               getUniqueAuthorLength(data, pageLimit, thisPage));
 
-              console.log(getUniqueAuthorLength(data, pageLimit, thisPage-1 ) + ', ' +
+              console.log(getUniqueAuthorLength(data, pageLimit, thisPage-1) + ', ' +
                                   getUniqueAuthorLength(data, pageLimit, thisPage))
 
               d3.selectAll("g > *").remove();
@@ -190,19 +264,22 @@ export default class MainGraph {
                 d3.select("#nextPage").attr('disabled', null);
               }
             } else if (thisPage == 1) {
+              document.getElementById("thisPage").innerHTML = thisPage;
               dataSliced = data.slice(0, getUniqueAuthorLength(data, pageLimit, thisPage));
 
-              console.log(getUniqueAuthorLength(data, pageLimit, thisPage-1 ) + ', ' +
+              console.log(getUniqueAuthorLength(data, pageLimit, thisPage-1) + ', ' +
                                   getUniqueAuthorLength(data, pageLimit, thisPage))
                                   
               d3.selectAll("g > *").remove();
               console.log(dataSliced);
               drawGraph(dataSliced);
               d3.select("#prevPage").attr('disabled', true);
+              d3.select("#nextPage").attr('disabled', null);
             }
           })
 
         }
+        
       }
 
       // function to create chart /////////////////////////////// main code here //////////////////////////////
@@ -272,7 +349,7 @@ export default class MainGraph {
           .style("position", "absolute")
           .style("text-align", "center")
           .style("width", "200px")
-          .style("height", "65px")
+          .style("height", "auto")
           .style("padding", "8px")
           .style("font", "12px sans-serif")
           .style("pointer-events", "none")
@@ -301,7 +378,7 @@ export default class MainGraph {
           .attr("y2", function (d) { return y(d.name); })
           .style("position", "relative")
           .attr("stroke", function (d) {
-            if (d.birth_year != "Unknown" && d.death_year != "Unknown" && (!d.details.includes('active')) ) 
+            if (d.birth_year != "Unknown" && d.death_year != "Unknown" && (!d.details.includes('active') && !d.details.includes('approximately')) ) 
             { return colorScale(d3.group(data, d => d.name).get(d.name).length) }
           })
           .attr("stroke-width", "6px")
@@ -315,7 +392,7 @@ export default class MainGraph {
           .attr("x2", function (d) { return x(x2(d)) })
           .attr("y1", function (d) { return y(d.name); })
           .attr("y2", function (d) { return y(d.name); })
-          .attr("stroke", function (d) { if (d.birth_year == "Unknown") { return colorScaleUnknownBirth(d3.group(data, d => d.name).get(d.name).length) } else if (d.death_year == "Unknown") { return colorScaleUnknownDeath(d3.group(data, d => d.name).get(d.name).length) } })
+          .attr("stroke", function (d) { if (d.birth_year == "Unknown") { return colorScaleUnknownBirth(d3.group(data, d => d.name).get(d.name).length) } else if (d.death_year == "Unknown") { return colorScaleUnknownDeath(d3.group(data, d => d.name).get(d.name).length) } else if (d.birth_year == 'Unknown' && d.death_year == 'Unknown') return "#999"})
           .attr("stroke-width", "6px")
 
         // Lines for active date entries
@@ -347,14 +424,15 @@ export default class MainGraph {
             d3.select(this).enter()
               .append("div")
               .attr("x1", function (d) { if (d.active_date != "Unknown" && (d.birth_year == 'Unknown' && d.death_year == 'Unknown')) { return x(d.active_date - 20); 
-              } else if ((d.details == 'active' || d.details.includes('active')) && d.birth_year != "Unknown") { 
+              } else if ((d.details == 'active' || d.details.includes('active')) ||(d.details == 'approximately' || d.details.includes('approximately')) && d.birth_year != "Unknown") { 
                 return x(d.birth_year)} })
               .attr("x2", function (d) { if (d.active_date != "Unknown" && (d.birth_year == 'Unknown' && d.death_year == 'Unknown')) { return x(d.active_date + 20); 
-              } else if ((d.details == 'active' || d.details.includes('active')) && d.death_year != "Unknown") { 
+              } else if ((d.details == 'active' || d.details.includes('active')) ||(d.details == 'approximately' || d.details.includes('approximately')) && d.death_year != "Unknown") { 
                 return x(d.death_year)} })
               .attr("y1", function (d) { return y(d.name); })
               .attr("y2", function (d) { return y(d.name); })
-              .style("stroke", function (d) { if (d.details == 'active' || d.details.includes('active')) { return Colors.activeDateLine() } else { return Colors.blank() } })
+              .style("stroke", function (d) { if ((d.details == 'active' || d.details.includes('active')) || (d.details == 'approximately' || d.details.includes('approximately'))) {
+                 return Colors.activeDateLine() } else { return Colors.blank() } })
               .attr("stroke-width", "6px")
           })
           .on("mouseout", function () {
@@ -381,20 +459,24 @@ export default class MainGraph {
               .duration(400).attr('stroke', Colors.authorNameHovered())
             authorInfo.transition()
               .duration(400)
-              .style("opacity", .9);
+              .style("opacity", .9)
             authorInfo.html(function () {
               if (d.active_date == "Unknown") {
-                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.technique).get(d.name).keys()) + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
+                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.technique).get(d.name).keys()) + 
+                '<br> Meio(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.medium).get(d.name).keys()) +
+                '<br> Número de pinturas (filtro): ' + d3.group(data, d => d.name).get(d.name).length
               } else if (d.birth_year == "Unknown" || d.death_year == "Unknown") {
-                return d.name + "<br>" + "Data de atividade: " + d.active_date + '<br> Técnica(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.technique).get(d.name).keys()) + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length
+                return d.name + "<br>" + "Data de atividade: " + d.active_date + '<br> Técnica(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.technique).get(d.name).keys()) +
+                '<br> Meio(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.medium).get(d.name).keys()) + '<br> Número de pinturas (filtro): ' + d3.group(data, d => d.name).get(d.name).length
               } else {
-                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.technique).get(d.name).keys()) + '<br> Número de pinturas: ' + d3.group(data, d => d.name).get(d.name).length + "<br> Data de atividade: " + d.active_date
+                return d.name + ", " + d.birth_year + "-" + d.death_year + '<br> Técnica(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.technique).get(d.name).keys()) +
+                '<br> Meio(s) de pintura: ' + Array.from(d3.group(data, d => d.name, d => d.medium).get(d.name).keys()) + '<br> Número de pinturas (filtro): ' + d3.group(data, d => d.name).get(d.name).length
               }
             }
 
             )
               .style("left", (event.pageX) + "px")
-              .style("top", (event.pageY - 28) + "px");
+              .style("top", (event.pageY - 28) + "px")
           })
           .on("mouseout", function () {
             d3.select(this).transition()
@@ -440,6 +522,48 @@ export default class MainGraph {
           });
 
 
+      }
+
+      console.log('TAMANHO ->>> '+ data.length);
+
+      ///////// é necessário alterar a lógica da paginação. 
+      function getUniqueAuthorLength(data, pageLimit, page) {
+        /// LÓGICA QUE VAI INUTILIZAR O INDEX (SE TUDO DER CERTOO)
+        //number of lines with author number limited by pageLimit
+        let totalLength = 0;
+        //data size while reading
+        let dataLength = 0;
+        // CRITÉRIO DE PARADA
+        if (page == 0) return 0;
+        if (data.length <= pageLimit) return pageLimit;
+        
+        else{
+          // Recursively get the starting point of the loop
+          let start = getUniqueAuthorLength(data, pageLimit, page-1)
+          // Loop:
+          for (let i = start; i < data.length + 1; i++) {
+              let thisName = data[i].name;
+              let nextName = data[i + 1].name;
+
+              // check if next name is different
+              if (thisName != nextName) {
+                // this holds the limit of the page
+                dataLength++;
+                // uniqueAuthorsSize++;
+              }
+              //add to total length 
+              totalLength++;
+              if(dataLength == pageLimit) {
+                isLastPage = false;
+                return totalLength+start;
+              } else if (totalLength + start >= data.length - lastPageLimit) {
+                isLastPage = true;
+                return data.length;
+              }
+              // if (dataLength == pageLimit || totalLength + start + dataLength >= data.length - pageLimit) return totalLength+start;
+          } //totalLength + start + dataLength >= data.length - pageLimit
+          return;
+        }
       }
 
       // A function that update the plot for a given value
@@ -504,9 +628,9 @@ function x2(d) {
 }
 
 function x1ActiveDate(d) {
-  if (d.active_date != 'Unknown' && d.birth_year != 'Unknown' && (d.details == 'active' || d.details.includes('active'))) {
+  if (d.birth_year != 'Unknown' && d.death_year != 'Unknown' && (d.details == 'active' || d.details.includes('active') || d.details == 'approximately' || d.details.includes('approximately'))) {
     return +d.birth_year;
-  } else if (d.active_date == 'Unknown' && d.birth_year != 'Unknown' && (d.details == 'active' || d.details.includes('active'))) {
+  } else if (d.active_date == 'Unknown' && d.birth_year != 'Unknown' && (d.details == 'active' || d.details.includes('active') || d.details == 'approximately' || d.details.includes('approximately'))) {
     return +d.birth_year;
   } else if (d.birth_year == "Unknown" && d.death_year == "Unknown" && d.active_date != "Unknown") {
     if (d.active_date == "16th century") {
@@ -526,9 +650,9 @@ function x1ActiveDate(d) {
 }
 
 function x2ActiveDate(d) {
-  if (d.active_date != 'Unknown' && d.death_year != 'Unknown' && (d.details == 'active' || d.details.includes('active'))) {
+  if (d.death_year != 'Unknown' && d.birth_year != 'Unknown' && (d.details == 'active' || d.details.includes('active') || d.details == 'approximately' || d.details.includes('approximately'))) {
     return +d.death_year;
-  } else if (d.active_date == 'Unknown' && d.death_year != 'Unknown' && (d.details == 'active' || d.details.includes('active'))) {
+  } else if (d.active_date == 'Unknown' && d.death_year != 'Unknown' && (d.details == 'active' || d.details.includes('active') || d.details == 'approximately' || d.details.includes('approximately'))) {
     return +d.death_year;
   } else if (d.birth_year == "Unknown" && d.death_year == "Unknown" && d.active_date != "Unknown") {
     if (d.active_date == "16th century") {
@@ -574,35 +698,48 @@ function dotColor(data, color) {
   }
 }
 
-///////// é necessário alterar a lógica da paginação. 
-function getUniqueAuthorLength(data, pageLimit, page) {
-  /// LÓGICA QUE VAI INUTILIZAR O INDEX (SE TUDO DER CERTOO)
-  //number of lines with author number limited by pageLimit
-  let totalLength = 0;
-  //data size while reading
-  let dataLength = 0;
+function horizontalGradientLegend(id, color1, color2) {
+  ////////// LEGEND CODE START //////////////////
+      //Append a linearGradient element to the defs and give it a unique id
+      let linearGradient = d3.select(id).append("linearGradient").attr("id",id);
+      //Horizontal gradient
+      linearGradient
+          .attr("x1", "0%")
+          .attr("y1", "0%")
+          .attr("x2", "100%")
+          .attr("y2", "0%");
 
-  // CRITÉRIO DE PARADA
-  if (page == 0) return 0;
-  
-  else{
-    // Recursively get the starting point of the loop
-    let start = getUniqueAuthorLength(data, pageLimit, page-1)
-    // Loop:
-    for (let i = start; i < data.length; i++) {
-        let thisName = data[i].name;
-        let nextName = data[i + 1].name;
+      //Set the color for the start (0%)
+      linearGradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", color1); //light blue
 
-        // check if next name is different
-        if (thisName != nextName) {
-          // this holds the limit of the page
-          dataLength++;
-        }
-        //add to total length 
-        totalLength++;
-        if (dataLength == pageLimit || totalLength+start > data.length - pageLimit) break;
-    }
+      //Set the color for the end (100%)
+      linearGradient.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", color2); //dark blue
 
-    return totalLength+start;
-  }
+      //Draw the rectangle and fill with gradient
+      d3.select(id).append("rect")
+      .attr("width", 300)
+      .attr("height", 20)
+      .style("fill", "url(#"+id+")")
+      .style("paddingOuter",0)
+
+      d3.select(id).append("text")
+      .attr("x", 0)
+      .attr("y", 30)
+      .style("text-anchor", "left")
+      .style("font-size", "12px")
+      .style("fill","#4F4F4F")
+      .text("Menos pinturas");
+
+      d3.select(id).append("text")
+      .attr("x", 229)
+      .attr("y", 30)
+      .style("text-anchor", "left")
+      .style("font-size", "12px")
+      .style("fill","#4F4F4F")
+      .text("Mais pinturas");
+      ///////////// LEGEND CODE END ////////////////
 }
