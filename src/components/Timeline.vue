@@ -5,36 +5,47 @@
   <v-app>
     <v-container>
       <v-row>
-        
         <v-col cols="1" class="d-flex">
-          <!-- <v-col>
-          Legenda<br>
+          <!-- Legenda<br>
           <div class="pa-1">Anos de nascimento e morte conhecidos<br><svg id="colorLegend1"></svg></div>
           <div class="pa-1">Ano de nascimento desconhecido<br><svg id="colorLegend2"></svg></div>
-          <div class="pa-1">Ano de morte desconhecido<br><svg id="colorLegend3"></svg></div>
-        </v-col> -->
-          <div class="pa-1">
-            <h3 class="pb-2">Visualização de Linhas do Tempo de Obras de Arte</h3>
-            <p>Organizado por data de nascimento e morte do/da artista</p>
-            <p><button id="prevPage">Página anterior</button>
-            <button id="nextPage">Próxima página</button>
-             Página <span id="thisPage"></span></p>
+          <div class="pa-1">Ano de morte desconhecido<br><svg id="colorLegend3"></svg></div> -->
+          <div class="grid-container">
+            <div class="grid-item">
+              <div class="pa-1">
+                <h3 class="pb-2">
+                  Visualização de Linhas do Tempo de Obras de Arte
+                </h3>
+                <p>Organizado por data de nascimento e morte do/da artista</p>
+                <p>
+                  <button id="prevPage">Página anterior</button>
+                  <button id="nextPage">Próxima página</button>
+                  Página <span id="thisPage"></span>
+                </p>
+              </div>
+              <div class="pa-1">
+                Técnica de pintura:
+                <select id="selectTechnique"></select>
+              </div>
+              <br />
+              <div class="pa-1">
+                Meio utilizado:
+                <select style="max-width: 10%" id="selectMedium"></select>
+              </div>
+              <br />
+              Filtro selecionado: <span id="selectedFilter"></span>
+            </div>
+            <div class="grid-item">
+              <svg id="legend"></svg>
+              <!-- <svg id="colorLegend2"></svg>
+              <svg id="colorLegend3"></svg> -->
+            </div>
           </div>
-          <div class="pa-1">
-            Técnica de pintura:
-            <select id="selectTechnique"></select>
-          </div>
-          <br>
-          <div class="pa-1">
-              Meio utilizado:
-            <select style="max-width:10%" id="selectMedium"></select>
-          </div>
-          <br>
-          Filtro selecionado: <span id="selectedFilter"></span>
+
           <!-- <button id="">Restaurar zoom</button> -->
         </v-col>
-        
-        <div class="inner" >
+
+        <div class="inner">
           <div class="outer">
             <v-col id="my_dataviz" />
           </div>
@@ -73,18 +84,23 @@ export default {
   display: block;
   width: 1400px;
   height: 800px;
-  margin: 0 auto; 
+  margin: 0 auto;
 }
-.axisWhite{
-  stroke: white
+.axisWhite {
+  stroke: white;
 }
 
 .mediumDropdown {
-  width:100px;
+  width: 100px;
   align-content: center;
 }
 
 .mediumDropdown option {
-  max-width:90%;
+  max-width: 90%;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto ;
 }
 </style>

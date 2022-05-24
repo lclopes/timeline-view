@@ -9,6 +9,15 @@ export default class MainGraph {
   }
 
   createGraph() {
+    // select the svg area
+   
+
+    // // Handmade legend
+    // leg.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "#69b3a2")
+    // leg.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "#404080")
+    // leg.append("text").attr("x", 220).attr("y", 130).text("variable A").style("font-size", "15px").attr("alignment-baseline","middle")
+    // leg.append("text").attr("x", 220).attr("y", 160).text("variable B").style("font-size", "15px").attr("alignment-baseline","middle")
+
     // set the dimensions and margins of the graph
     let margin = { top: 10, right: 30, bottom: 30, left: 30 },
       width = 1500 - margin.left - margin.right,
@@ -36,10 +45,12 @@ export default class MainGraph {
       // set of techniques
       const allTechniqueGroup = new Set(data.map(d => d.technique.trim()));
       allTechniqueGroup.add('Todos');
-      
-      horizontalGradientLegend("#colorLegend1","#ffe0ff","#0000ff");
-      horizontalGradientLegend("#colorLegend2","#ffb7ce","#de425b");
-      horizontalGradientLegend("#colorLegend3","#b8d0e6","#0692cf");
+      let leg = d3.select("#legend")
+
+      horizontalGradientLegend(leg, "#colorLegend1","#ffe0ff","#0000ff",40,false);
+      horizontalGradientLegend(leg, "#colorLegend2","#ffb7ce","#de425b",80,false);
+      horizontalGradientLegend(leg, "#colorLegend3","#b8d0e6","#0692cf",120,false);
+      horizontalGradientLegend(leg, "#colorLegend4","#b8d0e6","#0692cf",160,true);
 
       // create dropdown menu of techniques
       d3.select("#selectTechnique")
@@ -74,7 +85,6 @@ export default class MainGraph {
       // starting page
       let thisPage = 1;
       document.getElementById("thisPage").innerHTML = thisPage;
-
       document.getElementById("selectedFilter").innerHTML = "Todos";
       
       //data size while reading
@@ -93,10 +103,13 @@ export default class MainGraph {
           document.getElementById("selectedFilter").innerHTML = "Todos";
         } else {
           document.getElementById("selectedFilter").innerHTML = "Técnica: "+ selectedOption ;
+          document.getElementById("selectMedium").selectedIndex = allMediumGroup.size -1;
         }
         // run the updateChart function with this selected option
         thisPage = 1;
+        document.getElementById("thisPage").innerHTML = thisPage;
         dataSliced = updateTechnique(selectedOption)
+        
       })
 
       d3.select("#selectMedium").on("change", function () {
@@ -106,10 +119,13 @@ export default class MainGraph {
           document.getElementById("selectedFilter").innerHTML = "Todos";
         } else {
           document.getElementById("selectedFilter").innerHTML = "Meio: "+ selectedOption ;
+          document.getElementById("selectTechnique").selectedIndex = allTechniqueGroup.size -1;
         }
         // run the updateChart function with this selected option
         thisPage = 1;
+        document.getElementById("thisPage").innerHTML = thisPage;
         dataSliced = updateMedium(selectedOption)
+        
       })
 
       // getting unique authors number
@@ -698,48 +714,66 @@ function dotColor(data, color) {
   }
 }
 
-function horizontalGradientLegend(id, color1, color2) {
+function horizontalGradientLegend(leg, id, color1, color2, height, isActive) {
   ////////// LEGEND CODE START //////////////////
-      //Append a linearGradient element to the defs and give it a unique id
-      let linearGradient = d3.select(id).append("linearGradient").attr("id",id);
-      //Horizontal gradient
-      linearGradient
-          .attr("x1", "0%")
-          .attr("y1", "0%")
-          .attr("x2", "100%")
-          .attr("y2", "0%");
+  if (!isActive) {
+    //Append a linearGradient element to the defs and give it a unique id
+    let linearGradient = leg.append("linearGradient").attr("id",id);
 
-      //Set the color for the start (0%)
-      linearGradient.append("stop")
-      .attr("offset", "0%")
-      .attr("stop-color", color1); //light blue
+    //Horizontal gradient
+    linearGradient
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%");
 
-      //Set the color for the end (100%)
-      linearGradient.append("stop")
-      .attr("offset", "100%")
-      .attr("stop-color", color2); //dark blue
+      
+    //Set the color for the start (0%)
+    linearGradient.append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", color1); //light blue
 
-      //Draw the rectangle and fill with gradient
-      d3.select(id).append("rect")
-      .attr("width", 300)
-      .attr("height", 20)
-      .style("fill", "url(#"+id+")")
-      .style("paddingOuter",0)
+    //Set the color for the end (100%)
+    linearGradient.append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", color2); //dark blue
 
-      d3.select(id).append("text")
-      .attr("x", 0)
-      .attr("y", 30)
-      .style("text-anchor", "left")
-      .style("font-size", "12px")
-      .style("fill","#4F4F4F")
-      .text("Menos pinturas");
+    //Draw the rectangle and fill with gradient
+    leg.append("rect")
+    .attr("width", 200)
+    .attr("height", 20)
+    .attr('y',height)
+    .style("fill", "url(#"+id+")")
+    .style("paddingOuter",1)
 
-      d3.select(id).append("text")
-      .attr("x", 229)
-      .attr("y", 30)
-      .style("text-anchor", "left")
-      .style("font-size", "12px")
-      .style("fill","#4F4F4F")
-      .text("Mais pinturas");
-      ///////////// LEGEND CODE END ////////////////
+    ///////////// LEGEND CODE END ////////////////
+  } else {
+    console.log('Entrou else')
+    // leg.append("line")
+    // .attr("width", 200)
+    // .attr("height", 20)
+    // .attr('y',height)
+    // .attr("stroke", function () { return Colors.activeDateLine() })
+    // .attr("stroke-width", "6px")
+    // .style("stroke-dasharray", ("3, 2"))
+    leg.append("rect")
+    .attr("stroke-width", "6px")
+    .style("stroke-dasharray", ("3, 2"))
+  }
+  
+  leg.append("text")
+    .attr("x", 0)
+    .attr("y", height)
+    .style("text-anchor", "left")
+    .style("font-size", "12px")
+    .style("fill","#4F4F4F")
+    .text("Menos pinturas");
+
+  leg.append("text")
+    .attr("x", 129)
+    .attr("y", height)
+    .style("text-anchor", "left")
+    .style("font-size", "12px")
+    .style("fill","#4F4F4F")
+    .text("Mais pinturas");
 }
