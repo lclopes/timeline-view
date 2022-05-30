@@ -9,15 +9,6 @@ export default class MainGraph {
   }
 
   createGraph() {
-    // select the svg area
-   
-
-    // // Handmade legend
-    // leg.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "#69b3a2")
-    // leg.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "#404080")
-    // leg.append("text").attr("x", 220).attr("y", 130).text("variable A").style("font-size", "15px").attr("alignment-baseline","middle")
-    // leg.append("text").attr("x", 220).attr("y", 160).text("variable B").style("font-size", "15px").attr("alignment-baseline","middle")
-
     // set the dimensions and margins of the graph
     let margin = { top: 10, right: 30, bottom: 30, left: 30 },
       width = 1500 - margin.left - margin.right,
@@ -27,10 +18,6 @@ export default class MainGraph {
     let svg = d3.select("#my_dataviz")
       .append('svg')
       .attr("viewBox", [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom])
-      // .attr('width', width + margin.left + margin.right)
-      // .attr('height', height + margin.top + margin.bottom)
-
-      // .call(responsivefy) // Call responsivefy to make the chart responsive
       .append("g")
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
@@ -45,13 +32,24 @@ export default class MainGraph {
       // set of techniques
       const allTechniqueGroup = new Set(data.map(d => d.technique.trim()));
       allTechniqueGroup.add('Todos');
+
+      // set of mediums
+      const allMediumGroup = new Set(data.map(d => d.medium.trim()));
+      allMediumGroup.add('Todos');
+
+      // create legend
       let leg = d3.select("#legend")
-
-      horizontalGradientLegend(leg, "#colorLegend1","#ffe0ff","#0000ff",40,false);
-      horizontalGradientLegend(leg, "#colorLegend2","#ffb7ce","#de425b",80,false);
-      horizontalGradientLegend(leg, "#colorLegend3","#b8d0e6","#0692cf",120,false);
-      horizontalGradientLegend(leg, "#colorLegend4","#b8d0e6","#0692cf",160,true);
-
+      legendTitle(leg, 15);
+      subtitleLessMore(leg, 35);
+      horizontalGradientLegend(leg, "#colorLegend1","#ffe0ff","#0000ff",37,false);
+      legendTextSmall(leg, "Ano de nascimento e morte conhecidos", 57)
+      horizontalGradientLegend(leg, "#colorLegend2","#ffb7ce","#de425b",67,false);
+      legendTextSmall(leg, "Apenas ano de morte conhecido", 87);
+      horizontalGradientLegend(leg, "#colorLegend3","#b8d0e6","#0692cf",97,false);
+      legendTextSmall(leg, "Apenas ano de nascimento conhecido", 117);
+      horizontalGradientLegend(leg, "#colorLegend4","#b8d0e6","#0692cf",132,true);
+      legendTextSmall(leg, "Data aproximada de atividade conhecida", 147);
+      
       // create dropdown menu of techniques
       d3.select("#selectTechnique")
         .selectAll('myOptions')
@@ -61,9 +59,6 @@ export default class MainGraph {
         .property("selected", "Todos")
         .text(function (d) { return d; }) // text showed in the menu
         .attr("value", function (d) { return d; }) // corresponding value returned by the button
-
-      const allMediumGroup = new Set(data.map(d => d.medium.trim()));
-      allMediumGroup.add('Todos');
 
       // create dropdown menu of techniques
       d3.select("#selectMedium")
@@ -87,15 +82,11 @@ export default class MainGraph {
       document.getElementById("thisPage").innerHTML = thisPage;
       document.getElementById("selectedFilter").innerHTML = "Todos";
       
-      //data size while reading
-      // let uniqueAuthorsSize = 0;
-      
-      //technique filter
-      
       // getting first 20 unique authors
       let dataSliced = data.slice(getUniqueAuthorLength(data, pageLimit, thisPage -1), 
       getUniqueAuthorLength(data, pageLimit, thisPage));
 
+      // select technique logic
       d3.select("#selectTechnique").on("change", function () {
         // recover the option that has been chosen
         let selectedOption = d3.select(this).property("value")
@@ -112,6 +103,7 @@ export default class MainGraph {
         
       })
 
+      // select medium logic
       d3.select("#selectMedium").on("change", function () {
         // recover the option that has been chosen
         let selectedOption = d3.select(this).property("value")
@@ -136,13 +128,10 @@ export default class MainGraph {
         })
       })
       
+      // auxiliary variables for pagination
       let uniqueAuthorsSize = uniqueAuthors.length;
-      
-      let maxPage = uniqueAuthorsSize / pageLimit;
       let lastPageLimit = uniqueAuthorsSize % pageLimit;
       let isLastPage = false;
-
-      console.log(uniqueAuthorsSize + ' / ' + pageLimit + ' = ' + Math.ceil(maxPage));
 
       // setting X axis
       let x = d3.scaleLinear()
@@ -167,7 +156,7 @@ export default class MainGraph {
       // create chart
       drawGraph(dataSliced);
 
-      // redraw chart
+      // redraw chart when update technique
       function updateTechnique(selectedGroup) {
         let techniqueFiltered;
         if (selectedGroup == 'Todos') {
@@ -178,8 +167,6 @@ export default class MainGraph {
         }
         let techniqueFilteredSliced = techniqueFiltered.slice(getUniqueAuthorLength(techniqueFiltered, pageLimit, thisPage -1), 
         getUniqueAuthorLength(techniqueFiltered, pageLimit, thisPage));
-
-        console.log(techniqueFiltered);
 
         // Remove previous data
         d3.selectAll("g > *").remove();
@@ -193,6 +180,7 @@ export default class MainGraph {
         return techniqueFiltered;
       }
 
+      // redraw chart when update medium
       function updateMedium(selectedGroup) {
         let mediumFiltered;
         if (selectedGroup == 'Todos') {
@@ -203,8 +191,6 @@ export default class MainGraph {
         }
         let mediumFilteredSliced = mediumFiltered.slice(getUniqueAuthorLength(mediumFiltered, pageLimit, thisPage -1), 
         getUniqueAuthorLength(mediumFiltered, pageLimit, thisPage));
-
-        console.log(mediumFiltered);
 
         // Remove previous data
         d3.selectAll("g > *").remove();
@@ -218,9 +204,7 @@ export default class MainGraph {
         return mediumFilteredSliced;
       }
       
-      //// ATENÇÃO: PAGINAÇÃO DANDO PROBLEMA NA ÚLTIMA PÁGINA
-      // datasliced não reflete tamanho real da página
-      // prev/next button logic
+      // pagination logic
       function paginate(dataSliced, data, pageLimit, thisPage) {
         console.log(dataSliced);
         if (dataSliced.length <= pageLimit && thisPage == 1) {
@@ -315,34 +299,11 @@ export default class MainGraph {
           .paddingInner(0)
           .align(1)
 
-        // svg.append("g")
-        //   .call(d3.axisLeft(y))
-        //   .attr("y", 6)
-
-        // svg.call(d3.zoom()
-        //   .extent([[0, 0], [width, height]])
-        //   .scaleExtent([1, 8])
-        //   .on("zoom", zoomed));
-
-        // function zoomed({ transform }) {
-        //   svg.attr("transform", transform);
-        // }
-
-        ///////////////////// TODO: COLOR GRADIENT BY NUMBER OF PAINTINGS BY AUTHOR /////////////////////////////////
+        // color logic
         let namesExtent = [1, 50];
-
         let colorScale = d3.scaleSequential().range(Colors.standardScale()).domain(namesExtent);
         let colorScaleUnknownBirth = d3.scaleSequential().range(Colors.unknownBirthScale()).domain(namesExtent);
         let colorScaleUnknownDeath = d3.scaleSequential().range(Colors.unknownDeathScale()).domain(namesExtent);
-
-        // let group = d3.group(data, d => d.name, d => d.technique);
-        // // let valuesGroup = group.values();
-
-        // console.log(group.get("Folwell, Samuel").keys());
-        // console.log(d3.extent(group.get(data, d => d.name)))
-        // let rangeNames = d3.rollup(data, v => v.length, d => d.name);
-        // let lineColor = d3.scaleOrdinal().domain(rangeNames.values).range(["grey","black"])
-        // console.log(lineColor)
 
         // Tooltips
         let tooltip = d3.select("body").append("div")
@@ -377,6 +338,7 @@ export default class MainGraph {
 
         let authors = [...new Set(data.map(d => d.name))];
 
+        // getting unique author number to create graph
         let uniqueAuthors = authors.map(function (d) {
           return data.find(function (e) {
             return e.name === d
@@ -507,8 +469,8 @@ export default class MainGraph {
           .data(uniqueAuthors)
           .enter()
           .append("circle")
-          .attr("cx", function (d) { if (d.birth_year != "Unknown" && (d.details != 'active' || !d.details.includes('active'))) { return x(+d.birth_year); } else if (d.death_year != "Unknown" || d.birth_year == "Unknown"
-           || d.details == 'active' || d.details.includes('active')) { return } })
+          .attr("cx", function (d) { if (d.birth_year != "Unknown" && ((d.details != 'active' || !d.details.includes('active')) ||(d.details != 'approximately' || !d.details.includes('approximately')))) { return x(+d.birth_year); } else if (d.death_year != "Unknown" || d.birth_year == "Unknown"
+           || ((d.details == 'active' || d.details.includes('active')) ||(d.details == 'approximately' || d.details.includes('approximately')))) { return } })
           .attr("cy", function (d) { return y(d.name); })
           .attr("r", "6")
           .style("fill", function (d) { if ((d.birth_year == "Unknown" && d.death_year == "Unknown" && d.details != 'None') ||
@@ -525,7 +487,8 @@ export default class MainGraph {
           .data(uniqueAuthors)
           .enter()
           .append("circle")
-          .attr("cx", function (d) { if (d.death_year != "Unknown" && (d.details != 'active' || !d.details.includes('active'))) { return x(+d.death_year); } else if (d.death_year == "Unknown" || d.birth_year != "Unknown" || d.details == 'active' || d.details.includes('active')) { return x(+d.birth_year + 80) } })
+          .attr("cx", function (d) { if (d.death_year != "Unknown" && ((d.details != 'active' || !d.details.includes('active')) ||(d.details != 'approximately' || !d.details.includes('approximately')))) { return x(+d.death_year); } else if (d.death_year == "Unknown" || d.birth_year != "Unknown"
+          || ((d.details == 'active' || d.details.includes('active')) ||(d.details == 'approximately' || d.details.includes('approximately')))) { return x(+d.birth_year + 80) } })
           .attr("cy", function (d) { return y(d.name); })
           .attr("r", "6")
           .style("fill", function (d) { if ((d.birth_year == "Unknown" && d.death_year == "Unknown" && d.details != 'None') ||
@@ -536,15 +499,13 @@ export default class MainGraph {
           .on("mouseout", function () {
             mouseout(this, tooltip)
           });
-
-
       }
 
+      // debug
       console.log('TAMANHO ->>> '+ data.length);
 
-      ///////// é necessário alterar a lógica da paginação. 
+      // pagination helper logic
       function getUniqueAuthorLength(data, pageLimit, page) {
-        /// LÓGICA QUE VAI INUTILIZAR O INDEX (SE TUDO DER CERTOO)
         //number of lines with author number limited by pageLimit
         let totalLength = 0;
         //data size while reading
@@ -623,10 +584,11 @@ export default class MainGraph {
 
     })
 
+    // debug
     console.log("LINE COUNT => " + line_count);
   }
 }
-// auxiliary functions
+/////////////////////////// auxiliary functions start ////////////////////////////
 function x1(d) {
   if (d.birth_year != "Unknown") {
     return +d.birth_year;
@@ -727,7 +689,6 @@ function horizontalGradientLegend(leg, id, color1, color2, height, isActive) {
         .attr("x2", "100%")
         .attr("y2", "0%");
 
-      
     //Set the color for the start (0%)
     linearGradient.append("stop")
     .attr("offset", "0%")
@@ -741,7 +702,7 @@ function horizontalGradientLegend(leg, id, color1, color2, height, isActive) {
     //Draw the rectangle and fill with gradient
     leg.append("rect")
     .attr("width", 200)
-    .attr("height", 20)
+    .attr("height", 10)
     .attr('y',height)
     .style("fill", "url(#"+id+")")
     .style("paddingOuter",1)
@@ -749,31 +710,56 @@ function horizontalGradientLegend(leg, id, color1, color2, height, isActive) {
     ///////////// LEGEND CODE END ////////////////
   } else {
     console.log('Entrou else')
-    // leg.append("line")
-    // .attr("width", 200)
-    // .attr("height", 20)
-    // .attr('y',height)
-    // .attr("stroke", function () { return Colors.activeDateLine() })
+    leg.append("line")
+    .attr("x1", 0)
+    .attr("x2", 200)
+    .attr("width", 200)
+    .attr("y1", height)
+    .attr("y2", height)
+    .attr("stroke", function () { return Colors.activeDateLine() })
+    .style("stroke-dasharray", ("3, 2"))
+    .attr("stroke-width", "10px")
+    // leg.append("rect")
     // .attr("stroke-width", "6px")
     // .style("stroke-dasharray", ("3, 2"))
-    leg.append("rect")
-    .attr("stroke-width", "6px")
-    .style("stroke-dasharray", ("3, 2"))
   }
   
+}
+
+function subtitleLessMore(leg, height) {
   leg.append("text")
     .attr("x", 0)
     .attr("y", height)
     .style("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "10px")
     .style("fill","#4F4F4F")
     .text("Menos pinturas");
 
   leg.append("text")
-    .attr("x", 129)
+    .attr("x", 140)
     .attr("y", height)
     .style("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "10px")
     .style("fill","#4F4F4F")
     .text("Mais pinturas");
+}
+
+function legendTextSmall(leg, text, height) {
+  leg.append("text")
+    .attr("x", 0)
+    .attr("y", height)
+    .style("text-anchor", "left")
+    .style("font-size", "10px")
+    .style("fill","#4F4F4F")
+    .text(text)
+}
+
+function legendTitle(leg, height) {
+  leg.append("text")
+    .attr("x", 0)
+    .attr("y", height)
+    .style("text-anchor", "left")
+    .style("font-size", "20px")
+    .style("fill","#4F4F4F")
+    .text('Legenda')
 }

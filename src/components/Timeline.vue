@@ -11,6 +11,7 @@
           <div class="pa-1">Ano de nascimento desconhecido<br><svg id="colorLegend2"></svg></div>
           <div class="pa-1">Ano de morte desconhecido<br><svg id="colorLegend3"></svg></div> -->
           <div class="grid-container">
+            <div class="grid-item"><div></div></div>
             <div class="grid-item">
               <div class="pa-1">
                 <h3 class="pb-2">
@@ -35,14 +36,11 @@
               <br />
               Filtro selecionado: <span id="selectedFilter"></span>
             </div>
-            <div class="grid-item">
+            <div class="grid-item legend">
               <svg id="legend"></svg>
-              <!-- <svg id="colorLegend2"></svg>
-              <svg id="colorLegend3"></svg> -->
             </div>
+            <div class="grid-item"><div></div></div>
           </div>
-
-          <!-- <button id="">Restaurar zoom</button> -->
         </v-col>
 
         <div class="inner">
@@ -101,6 +99,13 @@ export default {
 
 .grid-container {
   display: grid;
-  grid-template-columns: auto auto ;
+  grid-template-columns: auto auto auto auto;
+}
+
+.legend {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
 }
 </style>
